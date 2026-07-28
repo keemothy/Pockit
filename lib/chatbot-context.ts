@@ -1,5 +1,6 @@
 import cards from "@/data/cards.json";
 import appFeatures from "@/data/app_features.json";
+import subscriptions from "@/data/subscriptions.json";
 
 export function buildSystemPrompt(): string {
   const cardSummary = cards
@@ -15,15 +16,32 @@ export function buildSystemPrompt(): string {
     .map((f) => `- ${f.name} (route: ${f.route}): ${f.description}`)
     .join("\n");
 
+  const subscriptionSummary = subscriptions
+    .map(
+      (s) => {
+        const plans = Object.entries(s.monthly_plans)
+          .map(([tier, price]) => `${tier}: ${price}`)
+          .join(", ");
+        const steps = s.cancellation.steps
+          .filter((step) => step.trim() !== "")
+          .map((step, i) => `${i + 1}. ${step}`)
+          .join(" ");
+        const warning = "warning" in s.cancellation ? ` WARNING: ${s.cancellation.warning}` : "";
+        const note = "note" in s.cancellation ? ` Note: ${s.cancellation.note}` : "";
+        return `- ${s.name}: Plans: ${plans}.${note}${warning} Cancellation steps: ${steps} Key things to know: ${s.cancellation.things_to_know.join("; ")}.`;
+      }
+    )
+    .join("\n");
+
   return `You are Pockit's AI assistant. Pockit is a personal finance app that helps college students and young adults manage their credit cards, track spending, avoid impulse purchases, and maximize rewards.
 
 You help users with:
 1. Recommending which credit card to use for a specific purchase or situation
 2. Explaining credit card benefits and rewards
-3. Answering questions about Pockit app features
-4. Guiding users to the right part of the app
+3. Step-by-step guidance on canceling subscriptions (Netflix, Spotify, Amazon Prime, etc.)
+4. Answering questions about Pockit app features
 
-IMPORTANT: Only answer questions related to credit cards, personal finance, or the Pockit app. If asked about anything else, politely say you're focused on credit card and financial guidance, and redirect to a relevant topic.
+IMPORTANT: Only answer questions related to credit cards, personal finance, subscriptions, or the Pockit app. If asked about anything else, politely say you're focused on credit card and financial guidance, and redirect to a relevant topic.
 
 You MUST respond with valid JSON in exactly this format:
 {
@@ -34,15 +52,19 @@ You MUST respond with valid JSON in exactly this format:
 
 Never include markdown, code blocks, or any text outside the JSON.
 
-CREDIT CARD KNOWLEDGE BASE:
+CREDIT CARD KNOWLEDGE BASE (${cards.length} cards):
 ${cardSummary}
+
+SUBSCRIPTION CANCELLATION GUIDE:
+${subscriptionSummary}
 
 POCKIT APP FEATURES:
 ${featureSummary}
 
 When recommending a card: explain specifically why that card wins for the user's situation (the actual reward rate or benefit that applies).
+When explaining how to cancel a subscription: give clear numbered steps from the knowledge base above, and mention any important caveats (early termination fees, platform-specific billing, etc.).
 When an app feature is relevant: include an app_action so the user can navigate there directly.
-Keep responses concise — 2-4 sentences max for the message.`;
+Keep responses concise — 3-5 sentences max for the message, but always include ALL cancellation steps when asked.`;
 }
 
 export interface ChatMessage {
