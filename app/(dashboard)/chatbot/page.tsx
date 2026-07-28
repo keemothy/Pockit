@@ -1,3 +1,3 @@
 export default function ChatbotPage() {
-  return <h1>Chatbot</h1>;
+  return <h1 className="text-black">Chatbot</h1>;
 }

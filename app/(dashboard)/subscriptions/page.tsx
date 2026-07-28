@@ -1,3 +1,3 @@
 export default function SubscriptionsPage() {
-  return <h1>Subscriptions</h1>;
+  return <h1 className="text-black">Subscriptions</h1>;
 }

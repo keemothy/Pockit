@@ -1,3 +1,3 @@
 export default function WalletPage() {
-  return <h1>Wallet</h1>;
+  return <h1 className="text-black">Wallet</h1>;
 }
