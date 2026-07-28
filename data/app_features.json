@@ -1,51 +1,37 @@
 [
   {
-    "id": "card-manager",
-    "name": "Card Manager",
+    "id": "wallet",
+    "name": "Wallet",
     "description": "Add and manage all your credit cards in one place. View each card's rewards, benefits, and spending limits.",
-    "route": "/dashboard/cards",
-    "keywords": ["add card", "my cards", "manage cards", "card list", "view cards"]
+    "route": "/wallet",
+    "keywords": ["add card", "my cards", "manage cards", "card list", "view cards", "wallet"]
   },
   {
-    "id": "spending-tracker",
-    "name": "Spending Tracker",
-    "description": "Track all your transactions by category. See where your money is going across all your cards.",
-    "route": "/dashboard/spending",
-    "keywords": ["spending", "transactions", "budget", "track money", "expenses", "where did my money go"]
+    "id": "analytics",
+    "name": "Analytics",
+    "description": "Track all your transactions by category. See where your money is going across all your cards with spending charts and breakdowns.",
+    "route": "/analytics",
+    "keywords": ["spending", "transactions", "budget", "track money", "expenses", "analytics", "where did my money go"]
   },
   {
-    "id": "subscription-manager",
-    "name": "Subscription Manager",
+    "id": "subscriptions",
+    "name": "Subscriptions",
     "description": "See all your recurring subscriptions and monthly charges in one place. Never get surprised by a forgotten subscription again.",
-    "route": "/dashboard/subscriptions",
-    "keywords": ["subscriptions", "recurring", "Netflix", "Spotify", "Amazon Prime", "monthly charges", "cancel subscription"]
+    "route": "/subscriptions",
+    "keywords": ["subscriptions", "recurring", "Netflix", "Spotify", "Amazon Prime", "monthly charges", "cancel subscription", "renewal"]
   },
   {
-    "id": "card-recommender",
-    "name": "Card Recommender",
-    "description": "Tell us about a purchase or trip you're planning, and we'll recommend the best card to use based on your wallet.",
-    "route": "/dashboard/recommend",
-    "keywords": ["which card", "best card", "recommend", "what card should I use", "card suggestion"]
+    "id": "dashboard",
+    "name": "Dashboard",
+    "description": "Your financial overview: total balance, recent transactions, subscription spending, and spending charts at a glance.",
+    "route": "/",
+    "keywords": ["home", "dashboard", "overview", "summary", "spending overview"]
   },
   {
-    "id": "benefits-hub",
-    "name": "Benefits Hub",
-    "description": "View all the perks and benefits across your cards — credits, insurance, lounge access, and more — so you never leave money on the table.",
-    "route": "/dashboard/benefits",
-    "keywords": ["benefits", "perks", "credits", "rewards", "lounge access", "travel insurance"]
-  },
-  {
-    "id": "impulse-buy-checker",
-    "name": "Impulse Buy Checker",
-    "description": "Activate a cooling-off timer before making an unplanned purchase. The app holds the intended amount in a savings bucket, giving you time to decide if you really want it.",
-    "route": "/dashboard/impulse",
-    "keywords": ["impulse buy", "cooling off", "pause purchase", "should I buy", "wait before buying", "savings"]
-  },
-  {
-    "id": "rewards-optimizer",
-    "name": "Rewards Optimizer",
-    "description": "See which card earns the most on your upcoming purchase category. Maximize your cashback and points without memorizing every card's rewards structure.",
-    "route": "/dashboard/optimize",
-    "keywords": ["maximize rewards", "most points", "best cashback", "optimize", "earn more"]
+    "id": "settings",
+    "name": "Settings",
+    "description": "Manage your account settings, notifications, and app preferences.",
+    "route": "/settings",
+    "keywords": ["settings", "account", "profile", "preferences", "notifications"]
   }
 ]

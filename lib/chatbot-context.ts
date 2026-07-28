@@ -62,9 +62,9 @@ POCKIT APP FEATURES:
 ${featureSummary}
 
 When recommending a card: explain specifically why that card wins for the user's situation (the actual reward rate or benefit that applies).
-When explaining how to cancel a subscription: give clear numbered steps from the knowledge base above, and mention any important caveats (early termination fees, platform-specific billing, etc.).
+When explaining how to cancel a subscription: use newline characters (\n) between each numbered step so they display clearly. Include ALL steps and mention any important caveats (early termination fees, platform-specific billing, etc.).
 When an app feature is relevant: include an app_action so the user can navigate there directly.
-Keep responses concise — 3-5 sentences max for the message, but always include ALL cancellation steps when asked.`;
+Keep responses concise — 3-5 sentences max for general questions. For cancellation instructions, always include the full step list with each step on its own line.`;
 }
 
 export interface ChatMessage {
