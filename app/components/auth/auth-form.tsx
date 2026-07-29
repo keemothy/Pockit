@@ -33,7 +33,9 @@ export default function AuthForm() {
       return;
     }
 
-    router.replace("/auth/connect-bank");
+    // Pockit sign-in always opens the dashboard. Plaid Link is only opened
+    // later when the user chooses "Connect bank" from the Wallet page.
+    router.replace("/");
     router.refresh();
   }
 
