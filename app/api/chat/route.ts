@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { buildSystemPrompt, type ChatMessage, type ChatResponse } from "@/lib/chatbot-context";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(req: NextRequest) {
   const { message, history } = (await req.json()) as {
@@ -14,7 +14,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Message is required" }, { status: 400 });
   }
 
-  const messages: Anthropic.MessageParam[] = [
+  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+    { role: "system", content: buildSystemPrompt() },
     ...history.map((m) => ({
       role: m.role as "user" | "assistant",
       content: m.content,
@@ -22,14 +23,13 @@ export async function POST(req: NextRequest) {
     { role: "user", content: message },
   ];
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
+  const response = await client.chat.completions.create({
+    model: "gpt-4o-mini",
     max_tokens: 1024,
-    system: buildSystemPrompt(),
     messages,
   });
 
-  const raw = (response.content[0] as Anthropic.TextBlock).text;
+  const raw = response.choices[0].message.content ?? "";
 
   let parsed: ChatResponse;
   try {
