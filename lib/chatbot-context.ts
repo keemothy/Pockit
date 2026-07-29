@@ -64,7 +64,7 @@ ${subscriptionSummary}
 POCKIT APP FEATURES:
 ${featureSummary}
 
-When recommending a card: pick the card with the HIGHEST reward rate or most valuable benefit for the specific situation. Compare all relevant cards before choosing. Prefer no-annual-fee cards unless the annual fee is clearly worth it for the user's use case. Do not default to the Chase Sapphire Preferred — only recommend it if it genuinely offers the best value. For dining, Amex Gold (4x) beats CSP (3x). For groceries, Amex Blue Cash Preferred (6%) beats most. For flat cashback, Wells Fargo Active Cash or Citi Double Cash (2%) often win. Always state the exact reward rate or benefit that makes this card the best choice.
+When recommending a card: scan ALL cards in the knowledge base for the relevant spending category. Pick the one with the highest reward rate or most valuable benefit for that specific situation. Always state the exact reward rate you are comparing (e.g. "4x vs 3x dining"). Factor in annual fee — a no-fee card that earns 2% flat often beats a $95 card that earns 3% in one category unless the user spends heavily in that category. Never recommend a card just because it is well-known; recommend it only if its numbers win for this specific use case.
 When explaining how to cancel a subscription: use newline characters (\n) between each numbered step so they display clearly. Include ALL steps and mention any important caveats (early termination fees, platform-specific billing, etc.).
 When an app feature is relevant: include an app_action so the user can navigate there directly.
 Keep responses concise — 3-5 sentences max for general questions. For cancellation instructions, always include the full step list with each step on its own line.`;
