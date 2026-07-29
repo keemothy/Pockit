@@ -314,7 +314,7 @@
     "name": "Capital One Platinum",
     "issuer": "Capital One",
     "annual_fee": 0,
-    "rewards": {},
+    "rewards": { "note": "No rewards program — credit-building card only" },
     "benefits": [
       "No annual fee",
       "No rewards — purely a credit-building card",

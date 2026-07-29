@@ -182,6 +182,38 @@
     }
   },
   {
+    "id": "apple-music",
+    "name": "Apple Music",
+    "category": "music_streaming",
+    "website": "music.apple.com",
+    "monthly_plans": {
+      "Individual": "$10.99/month",
+      "Family (up to 6)": "$16.99/month",
+      "Student": "$5.99/month",
+      "Voice (Siri-only)": "$4.99/month"
+    },
+    "cancellation": {
+      "method": "device_settings",
+      "note": "If you have Apple One, Apple Music is bundled — cancel the Apple One subscription instead",
+      "steps": [
+        "On iPhone/iPad: Open Settings > [Your Name] > Subscriptions",
+        "Tap 'Apple Music'",
+        "Tap 'Cancel Subscription'",
+        "Tap 'Confirm'",
+        "",
+        "On Mac: Open App Store > click your profile photo > Manage Subscriptions",
+        "Or: Open Music app > Account menu > View My Account > Subscriptions > Manage"
+      ],
+      "things_to_know": [
+        "Downloaded music for offline listening is no longer available after cancellation",
+        "Music you purchased from iTunes is still yours and playable in the Music app",
+        "If you have Apple One, you cannot cancel Apple Music separately — you must cancel or downgrade Apple One",
+        "No cancellation fee",
+        "Access continues until end of billing period"
+      ]
+    }
+  },
+  {
     "id": "youtube-premium",
     "name": "YouTube Premium",
     "category": "streaming_video",
@@ -263,6 +295,182 @@
         "Switching to Free keeps your account but removes ad-free viewing and premium content",
         "If subscribed via Apple or Google Play, cancel through their respective billing settings",
         "No cancellation fee"
+      ]
+    }
+  },
+  {
+    "id": "crunchyroll",
+    "name": "Crunchyroll",
+    "category": "streaming_anime",
+    "website": "crunchyroll.com",
+    "monthly_plans": {
+      "Free (with ads)": "$0",
+      "Fan": "$7.99/month",
+      "Mega Fan": "$9.99/month",
+      "Ultimate Fan": "$14.99/month"
+    },
+    "cancellation": {
+      "method": "website_or_app_store",
+      "note": "If subscribed via Apple App Store, Google Play, or Roku, you must cancel through that platform — not through Crunchyroll's website",
+      "steps": [
+        "Go to crunchyroll.com and sign in",
+        "Click your username in the top-right corner",
+        "Select 'Account Settings'",
+        "Click 'Manage Membership' or 'Subscription'",
+        "Click 'Cancel Membership'",
+        "Select a reason and confirm cancellation"
+      ],
+      "things_to_know": [
+        "The free tier still exists with ads — your account is not deleted",
+        "Access to premium content continues until end of billing period",
+        "If subscribed through Apple or Google Play, cancel there — the Crunchyroll website won't show a cancel option",
+        "No cancellation fee",
+        "Watchlist and history are preserved on the free tier"
+      ]
+    }
+  },
+  {
+    "id": "paramount-plus",
+    "name": "Paramount+",
+    "category": "streaming_video",
+    "website": "paramountplus.com",
+    "monthly_plans": {
+      "Essential (with ads)": "$5.99/month",
+      "With SHOWTIME": "$11.99/month"
+    },
+    "cancellation": {
+      "method": "website_or_app",
+      "steps": [
+        "Go to paramountplus.com and sign in",
+        "Click your profile icon in the top-right",
+        "Select 'Account Settings'",
+        "Under 'Subscription', click 'Cancel Subscription'",
+        "Select a reason",
+        "Click 'Confirm Cancellation'"
+      ],
+      "things_to_know": [
+        "If subscribed through Amazon Prime Video Channels, Apple, or Roku, cancel through those platforms",
+        "Access continues until end of billing period",
+        "No cancellation fee"
+      ]
+    }
+  },
+  {
+    "id": "espn-plus",
+    "name": "ESPN+",
+    "category": "streaming_sports",
+    "website": "espnplus.com",
+    "monthly_plans": {
+      "ESPN+ Monthly": "$10.99/month",
+      "ESPN+ Annual": "$109.99/year",
+      "Disney Bundle (Disney+, Hulu, ESPN+)": "$14.99/month"
+    },
+    "cancellation": {
+      "method": "website_or_app",
+      "steps": [
+        "Go to espnplus.com and sign in",
+        "Click your profile icon",
+        "Select 'Manage Account'",
+        "Go to 'Subscription'",
+        "Click 'Cancel Subscription'",
+        "Confirm cancellation"
+      ],
+      "things_to_know": [
+        "If you have the Disney Bundle, canceling ESPN+ cancels the whole bundle",
+        "If subscribed via Apple or Google Play, cancel through their billing settings",
+        "Access continues until end of billing period",
+        "No cancellation fee"
+      ]
+    }
+  },
+  {
+    "id": "xbox-game-pass",
+    "name": "Xbox Game Pass Ultimate",
+    "category": "gaming",
+    "website": "xbox.com/en-US/xbox-game-pass",
+    "monthly_plans": {
+      "PC Game Pass": "$11.99/month",
+      "Game Pass Ultimate (console + PC + cloud)": "$19.99/month"
+    },
+    "cancellation": {
+      "method": "website_or_console",
+      "steps": [
+        "Go to account.microsoft.com and sign in",
+        "Click 'Services & subscriptions' in the top menu",
+        "Find 'Xbox Game Pass Ultimate' or 'PC Game Pass'",
+        "Click 'Manage'",
+        "Click 'Cancel'",
+        "Follow the prompts and confirm cancellation",
+        "",
+        "Alternative — on Xbox console: Press Xbox button > Profile & system > Settings > Account > Subscriptions > Cancel"
+      ],
+      "things_to_know": [
+        "Access to Game Pass games continues until end of the current billing period",
+        "Games you own outright (purchased separately) are not affected",
+        "No early termination fee — cancel anytime",
+        "PC Game Pass and Console Game Pass are separate tiers; Ultimate includes both plus EA Play and cloud gaming",
+        "You can turn off auto-renewal instead of canceling immediately to keep access until expiry"
+      ]
+    }
+  },
+  {
+    "id": "playstation-plus",
+    "name": "PlayStation Plus",
+    "category": "gaming",
+    "website": "playstation.com",
+    "monthly_plans": {
+      "Essential": "$7.99/month ($59.99/year)",
+      "Extra": "$14.99/month ($99.99/year)",
+      "Premium": "$17.99/month ($139.99/year)"
+    },
+    "cancellation": {
+      "method": "website_or_console",
+      "steps": [
+        "Go to playstation.com and sign in",
+        "Click your profile icon and go to 'PlayStation Store'",
+        "Click your account icon > 'Subscriptions'",
+        "Find PlayStation Plus and click 'Cancel Subscription'",
+        "Follow the prompts to confirm",
+        "",
+        "Alternative — on PS5: Settings > Users and Accounts > Account > Payment and Subscriptions > Subscriptions > Cancel"
+      ],
+      "things_to_know": [
+        "Monthly PS+ games (claimed while subscribed) are no longer playable after membership ends — they return if you resubscribe",
+        "Games you purchased outright are not affected",
+        "No partial refunds after billing — cancel before your next renewal date",
+        "PlayStation may offer a refund within 14 days of renewal if you haven't downloaded or played the monthly games",
+        "Extra and Premium tiers include a game catalog; Essential is primarily online multiplayer + monthly games"
+      ]
+    }
+  },
+  {
+    "id": "nintendo-switch-online",
+    "name": "Nintendo Switch Online",
+    "category": "gaming",
+    "website": "nintendo.com/switch/online",
+    "monthly_plans": {
+      "Individual": "$3.99/month ($19.99/year)",
+      "Family Plan (up to 8 accounts)": "$34.99/year",
+      "Individual + Expansion Pack": "$4.99/month ($49.99/year)",
+      "Family + Expansion Pack": "$79.99/year"
+    },
+    "cancellation": {
+      "method": "website_or_console",
+      "steps": [
+        "Go to accounts.nintendo.com and sign in",
+        "Click your username/icon in the top-right",
+        "Go to 'Nintendo Switch Online' or 'Subscriptions'",
+        "Select your subscription and click 'Cancel Automatic Renewal'",
+        "Confirm the cancellation",
+        "",
+        "Alternative — on Nintendo Switch: Open Nintendo eShop > account icon in top-right > Nintendo Switch Online > Cancel Membership"
+      ],
+      "things_to_know": [
+        "Online multiplayer access ends when membership expires",
+        "Cloud save data may be deleted 6 months after membership lapses — download local saves before canceling",
+        "Expansion Pack adds Nintendo 64, SEGA Genesis, and Game Boy games; canceling to base plan removes those",
+        "Family Plan allows up to 8 Nintendo Accounts under one subscription",
+        "No early termination fee — you keep access until the paid period ends"
       ]
     }
   },
@@ -363,6 +571,35 @@
     }
   },
   {
+    "id": "dropbox",
+    "name": "Dropbox Plus",
+    "category": "cloud_storage",
+    "website": "dropbox.com",
+    "monthly_plans": {
+      "Plus (annual billing)": "$9.99/month ($119.99/year)",
+      "Plus (monthly billing)": "$11.99/month",
+      "Essentials (annual)": "$20/month ($240/year)"
+    },
+    "cancellation": {
+      "method": "website",
+      "steps": [
+        "Go to dropbox.com and sign in",
+        "Click your profile icon in the top-right corner",
+        "Select 'Settings'",
+        "Click the 'Plan' tab",
+        "Click 'Cancel plan' or 'Downgrade to Basic'",
+        "Follow the prompts and confirm cancellation"
+      ],
+      "things_to_know": [
+        "After canceling, your storage limit drops to 2GB free — files are not immediately deleted but you cannot upload new files over the limit",
+        "Dropbox retains deleted files and version history for 30 days (monthly plan) or 180 days (annual plan) for recovery",
+        "Annual plan: no refund for unused months",
+        "No cancellation fee for monthly plans",
+        "If you're on a Business plan, canceling affects your entire team"
+      ]
+    }
+  },
+  {
     "id": "icloud-plus",
     "name": "iCloud+",
     "category": "cloud_storage_apple",
@@ -427,56 +664,118 @@
     }
   },
   {
-    "id": "paramount-plus",
-    "name": "Paramount+",
-    "category": "streaming_video",
-    "website": "paramountplus.com",
+    "id": "audible",
+    "name": "Audible",
+    "category": "audiobooks",
+    "website": "audible.com",
     "monthly_plans": {
-      "Essential (with ads)": "$5.99/month",
-      "With SHOWTIME": "$11.99/month"
+      "Audible Plus": "$7.95/month (unlimited listening from Plus catalog)",
+      "Audible Premium Plus": "$14.95/month (1 credit/month for any audiobook + Plus catalog)"
     },
     "cancellation": {
-      "method": "website_or_app",
+      "method": "website_or_phone",
       "steps": [
-        "Go to paramountplus.com and sign in",
-        "Click your profile icon in the top-right",
-        "Select 'Account Settings'",
-        "Under 'Subscription', click 'Cancel Subscription'",
-        "Select a reason",
-        "Click 'Confirm Cancellation'"
+        "Go to audible.com and sign in",
+        "Click your account name in the top-right corner",
+        "Select 'Account Details'",
+        "Click 'Cancel Membership' in the Membership Details section",
+        "Follow the prompts — Audible may offer a pause or discount to retain you",
+        "Click 'Cancel Membership' to confirm",
+        "",
+        "Alternative: Call Audible customer service at 1-888-283-5051"
       ],
       "things_to_know": [
-        "If subscribed through Amazon Prime Video Channels, Apple, or Roku, cancel through those platforms",
-        "Access continues until end of billing period",
-        "No cancellation fee"
+        "Audiobooks you purchased with credits are yours to keep forever — they are not lost when you cancel",
+        "Unused credits typically expire upon cancellation — use them before canceling",
+        "You can pause your membership for 1-3 months instead of canceling",
+        "Audible Plus catalog access ends upon cancellation",
+        "Audible is owned by Amazon — your account is linked to your Amazon login"
       ]
     }
   },
   {
-    "id": "espn-plus",
-    "name": "ESPN+",
-    "category": "streaming_sports",
-    "website": "espnplus.com",
+    "id": "duolingo-super",
+    "name": "Duolingo Super",
+    "category": "education",
+    "website": "duolingo.com",
     "monthly_plans": {
-      "ESPN+ Monthly": "$10.99/month",
-      "ESPN+ Annual": "$109.99/year",
-      "Disney Bundle (Disney+, Hulu, ESPN+)": "$14.99/month"
+      "Super Duolingo (monthly)": "$6.99/month",
+      "Super Duolingo (annual)": "$83.99/year (~$7/month)",
+      "Duolingo Max (monthly, limited availability)": "$14.99/month"
     },
     "cancellation": {
-      "method": "website_or_app",
+      "method": "app_store_or_website",
+      "note": "You MUST cancel through whichever platform you originally subscribed on — Apple App Store, Google Play, or Duolingo's website",
       "steps": [
-        "Go to espnplus.com and sign in",
-        "Click your profile icon",
-        "Select 'Manage Account'",
-        "Go to 'Subscription'",
-        "Click 'Cancel Subscription'",
+        "If subscribed via Apple App Store: Open iPhone Settings > [Your Name] > Subscriptions > Duolingo > Cancel",
+        "If subscribed via Google Play: Open Google Play app > Profile > Payments & subscriptions > Subscriptions > Duolingo > Cancel",
+        "If subscribed directly via duolingo.com: Go to duolingo.com > Profile icon > Settings > Scroll to subscription > Cancel Subscription"
+      ],
+      "things_to_know": [
+        "All your progress, streaks, and XP are completely saved and unaffected by canceling",
+        "You revert to the free Duolingo tier which is still fully functional with ads",
+        "Super Duolingo features (unlimited hearts, no ads, streak repair, etc.) stop at billing period end",
+        "No cancellation fee",
+        "Must cancel through the original purchase platform — attempting to cancel elsewhere won't work"
+      ]
+    }
+  },
+  {
+    "id": "chatgpt-plus",
+    "name": "ChatGPT Plus",
+    "category": "ai_tools",
+    "website": "chatgpt.com",
+    "monthly_plans": {
+      "Plus": "$20/month",
+      "Pro": "$200/month"
+    },
+    "cancellation": {
+      "method": "website",
+      "steps": [
+        "Go to chatgpt.com and sign in",
+        "Click your profile icon or name in the bottom-left corner",
+        "Click 'My plan'",
+        "Click 'Manage my subscription'",
+        "Click 'Cancel plan'",
         "Confirm cancellation"
       ],
       "things_to_know": [
-        "If you have the Disney Bundle, canceling ESPN+ cancels the whole bundle",
-        "If subscribed via Apple or Google Play, cancel through their billing settings",
-        "Access continues until end of billing period",
-        "No cancellation fee"
+        "ChatGPT Plus access continues until the end of your current billing period",
+        "You will still have access to ChatGPT on the free tier after cancellation",
+        "Free tier uses GPT-4o with usage limits — Plus gives you higher limits and access to newer models",
+        "No cancellation fee",
+        "Your conversation history is preserved after canceling"
+      ]
+    }
+  },
+  {
+    "id": "planet-fitness",
+    "name": "Planet Fitness",
+    "category": "fitness",
+    "website": "planetfitness.com",
+    "monthly_plans": {
+      "Classic": "$10/month",
+      "Black Card": "$24.99/month"
+    },
+    "cancellation": {
+      "method": "in_person_or_certified_mail",
+      "warning": "IMPORTANT: Planet Fitness does NOT allow cancellation online or by phone — you must visit your home club in person or send a certified letter",
+      "steps": [
+        "Option 1 — In person: Visit your home club (the location you originally signed up at) during staffed hours",
+        "Ask a staff member to process your cancellation",
+        "Request a cancellation confirmation in writing",
+        "",
+        "Option 2 — Certified mail: Write a cancellation letter with your full name, home address, club location, and account number",
+        "Send it via certified mail (USPS) to your home club's address — find the address at planetfitness.com/locations",
+        "Keep your certified mail receipt as proof"
+      ],
+      "things_to_know": [
+        "You cannot cancel online, through the app, or by phone — in-person or certified mail only",
+        "A 10-day written notice before your next billing date may be required to avoid the next charge",
+        "Annual members may owe a portion of the remaining annual fee if canceling mid-commitment",
+        "Classic membership: no commitment period, cancel anytime",
+        "Black Card: check your original agreement for any commitment terms",
+        "Billing typically continues for 1 billing cycle after the cancellation is processed"
       ]
     }
   }
