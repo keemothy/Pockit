@@ -1,22 +1,26 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 // icons imports for dashboard
 // notes: similar "Subscription" icon missing from lucide so using another card-like icon
 import {
-  LayoutDashboard,
-  WalletCards,
-  ChartPie,
-  CreditCard,
   Bot,
+  ChartPie,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
+  LayoutDashboard,
+  LogOut,
   Settings,
+  WalletCards,
 } from "lucide-react";
+
+import { createClient } from "@/lib/supabase/client";
+
 
 const links = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -24,50 +28,51 @@ const links = [
   { href: "/analytics", label: "Analytics", icon: ChartPie },
   { href: "/subscriptions", label: "Subscriptions", icon: CreditCard },
   { href: "/chatbot", label: "Chatbot", icon: Bot },
-  { href: "/settings", label: "Setting", icon: Settings },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export default function Sidebar() {
-  // set default sidebar to open
+  
+   // set default sidebar to open
   const [isOpen, setIsOpen] = useState(true);
+  
   const pathname = usePathname();
+  const router = useRouter();
 
+  async function signOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.replace("/auth/login");
+    router.refresh();
+  }
+
+  // using ternary op. --> if sidebar is open then make width 64, o/w use width of 20 w/ icons
   return (
-    // using ternary op. --> if sidebar is open then make width 64, o/w use width of 20 w/ icons
     <nav
-      className={`relative min-h-screen p-4 border-r bg-[#E9F1FF] border-gray-200 transition-all duration-300 ${
+      className={`relative flex min-h-screen flex-col border-r border-gray-200 bg-[#E9F1FF] p-4 transition-all duration-300 ${
         isOpen ? "w-64" : "w-20"
       }`}
     >
-      <div
-        className={`flex items-center gap-3 mb-6 ${!isOpen ? "justify-center" : ""}`}
-      >
+      <div className={`mb-6 flex items-center ${!isOpen ? "justify-center" : ""}`}>
         <Image
           src="/pockit_logo.png"
           alt="Pockit"
           width={64}
           height={64}
-          className="rounded-lg shrink-0"
+          className="shrink-0 rounded-lg"
         />
-
-        {isOpen && (
-          <span className="font-semibold text-4xl text-[#57befe] truncate">
-            Pockit
-          </span>
-        )}
+        {isOpen && <span className="truncate text-4xl font-semibold text-[#57befe]">Pockit</span>}
       </div>
+
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="absolute -right-3 top-6 bg-white border border-gray-200 rounded-full p-1 hover:bg-gray-100 transition-colors shadow-sm"
+        type="button"
+        onClick={() => setIsOpen((open) => !open)}
+        className="absolute -right-3 top-6 rounded-full border border-gray-200 bg-white p-1 shadow-sm transition-colors hover:bg-gray-100"
       >
-        {isOpen ? (
-          <ChevronLeft className="w-4 h-4 text-[#1F78FF]" />
-        ) : (
-          <ChevronRight className="w-4 h-4 text-[#1F78FF]" />
-        )}
+        {isOpen ? <ChevronLeft className="h-4 w-4 text-[#1F78FF]" /> : <ChevronRight className="h-4 w-4 text-[#1F78FF]" />}
       </button>
 
-      <ul className="space-y-5 mt-10">
+      <ul className="mt-10 space-y-5">
         {links.map((link) => {
           const isActive = pathname === link.href;
           const Icon = link.icon;
@@ -77,19 +82,29 @@ export default function Sidebar() {
               <Link
                 href={link.href}
                 title={!isOpen ? link.label : undefined}
-                className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                  isActive
-                    ? "text-[#1F78FF] font-medium"
-                    : "text-gray-700 hover:bg-[#D5E5FF]"
+                className={`flex items-center gap-3 rounded-md px-3 py-2 transition-colors ${
+                  isActive ? "font-medium text-[#1F78FF]" : "text-gray-700 hover:bg-[#D5E5FF]"
                 } ${!isOpen ? "justify-center" : ""}`}
               >
-                <Icon className="w-5 h-5 shrink-0" />
+                <Icon className="h-5 w-5 shrink-0" />
                 {isOpen && <span className="truncate">{link.label}</span>}
               </Link>
             </li>
           );
         })}
       </ul>
+
+      <button
+        type="button"
+        onClick={() => void signOut()}
+        title={!isOpen ? "Sign out" : undefined}
+        className={`mt-auto flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-[#D5E5FF] ${
+          !isOpen ? "justify-center" : ""
+        }`}
+      >
+        <LogOut className="h-5 w-5 shrink-0" />
+        {isOpen && <span>Sign out</span>}
+      </button>
     </nav>
   );
 }
