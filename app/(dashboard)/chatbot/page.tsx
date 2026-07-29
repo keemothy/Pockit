@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import type { ChatMessage, ChatResponse } from "@/lib/chatbot-context";
 
 interface DisplayMessage {
@@ -90,9 +91,9 @@ export default function ChatbotPage() {
   const showSuggestedPrompts = messages.length === 1;
 
   return (
-    <div className="flex h-full flex-col bg-white rounded-xl border border-zinc-200 overflow-hidden">
+    <div className="flex h-full flex-col bg-white rounded-xl border border-gray-200 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-zinc-200 px-6 py-4">
+      <div className="flex items-center gap-3 border-b border-gray-200 px-6 py-4">
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1F78FF] text-white text-sm font-bold">
           P
         </div>
@@ -134,12 +135,12 @@ export default function ChatbotPage() {
               )}
 
               {msg.app_action && (
-                <a
+                <Link
                   href={msg.app_action.route}
                   className="rounded-xl bg-[#1F78FF] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-blue-700"
                 >
                   {msg.app_action.label} →
-                </a>
+                </Link>
               )}
             </div>
           </div>
@@ -181,7 +182,7 @@ export default function ChatbotPage() {
       )}
 
       {/* Input */}
-      <div className="border-t border-zinc-200 bg-white px-6 py-4">
+      <div className="border-t border-gray-200 bg-white px-6 py-4">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -194,7 +195,8 @@ export default function ChatbotPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about cards, subscriptions, or rewards..."
-            className="flex-1 rounded-full border border-zinc-300 bg-zinc-50 px-4 py-2.5 text-sm text-zinc-800 outline-none transition focus:border-[#1F78FF] focus:ring-2 focus:ring-blue-100"
+            maxLength={500}
+            className="flex-1 rounded-full border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#1F78FF] focus:ring-2 focus:ring-blue-100"
           />
           <button
             type="submit"
