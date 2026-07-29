@@ -54,11 +54,11 @@ export default function AuthForm() {
             <input className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={6} autoComplete={isSignUp ? "new-password" : "current-password"} />
           </label>
           {message && <p role="status" className="rounded-lg bg-slate-100 p-3 text-sm text-slate-700">{message}</p>}
-          <button type="submit" disabled={isSubmitting} className="w-full rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:bg-slate-300">
+          <button type="submit" disabled={isSubmitting} className="w-full cursor-pointer rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:bg-slate-300">
             {isSubmitting ? "Please wait…" : isSignUp ? "Create account" : "Sign in"}
           </button>
         </form>
-        <button type="button" onClick={() => { setIsSignUp((value) => !value); setMessage(null); }} className="mt-5 text-sm font-medium text-blue-600 hover:text-blue-700">
+        <button type="button" onClick={() => { setIsSignUp((value) => !value); setMessage(null); }} className="mt-5 text-sm font-medium text-blue-600 hover:text-blue-700 cursor-pointer">
           {isSignUp ? "Already have an account? Sign in" : "Need an account? Create one"}
         </button>
       </section>
