@@ -18,7 +18,11 @@ export default async function WalletPage() {
     .eq('user_id', user.id)
     .order('name');
 
-  const cards: WalletCard[] = (accounts ?? []).map((account, index) => {
+  const creditCardAccounts = (accounts ?? []).filter(
+    (account) => account.type?.toLowerCase() === 'credit',
+  );
+
+  const cards: WalletCard[] = creditCardAccounts.map((account, index) => {
     const balance = Math.max(Number(account.current_balance) || 0, 0);
     const available = Math.max(Number(account.available_balance) || 0, 0);
     const reportedLimit = Math.max(Number(account.credit_limit) || 0, 0);
@@ -32,9 +36,7 @@ export default async function WalletPage() {
       currentBalance: balance,
       limit,
       color: index % 3 === 0 ? 'blue' : index % 3 === 1 ? 'rainbow' : 'black',
-      reward: account.iso_currency_code
-        ? `${account.iso_currency_code} connected account`
-        : 'Connected account',
+      reward: 'Credit card',
       categories: [
         {
           label: 'Current balance',

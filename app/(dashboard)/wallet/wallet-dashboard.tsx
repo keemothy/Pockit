@@ -87,7 +87,7 @@ const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD
 function CreditCardVisual({ card, compact = false }: { card: WalletCard; compact?: boolean }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-xl text-white shadow-inner ${compact ? 'h-[86px] w-[136px]' : 'h-[180px] w-[286px]'}`}
+      className={`relative overflow-hidden rounded-xl text-white shadow-inner ${compact ? 'h-[86px] w-[136px]' : 'h-[150px] w-[240px]'}`}
       style={{ background: cardBackground[card.color] }}
     >
       <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'linear-gradient(124deg, transparent 31%, rgba(255,255,255,.55) 32%, transparent 33%, transparent 52%, rgba(91,228,255,.8) 53%, transparent 54%)' }} />
@@ -96,8 +96,8 @@ function CreditCardVisual({ card, compact = false }: { card: WalletCard; compact
           <span className={`${compact ? 'text-[7px]' : 'text-xs'} font-semibold tracking-wide`}>{card.issuer}</span>
           {!compact && <span className="text-xl font-bold italic">{card.color === 'blue' ? 'VISA' : card.color === 'rainbow' ? '◯ ◯' : 'AMEX'}</span>}
         </div>
-        {!compact && <div className="h-7 w-9 rounded-md bg-gradient-to-br from-stone-300 via-yellow-100 to-stone-400 opacity-90" />}
-        {!compact && <p className="font-mono text-sm tracking-[0.2em]">****  ****  ****  {card.lastFour}</p>}
+        {!compact && <div className="h-6 w-8 rounded-md bg-gradient-to-br from-stone-300 via-yellow-100 to-stone-400 opacity-90" />}
+        {!compact && <p className="font-mono text-xs tracking-[0.18em]">****  ****  ****  {card.lastFour}</p>}
         {!compact && <div className="flex justify-between text-[8px] text-white/75"><span>Card holder<br /><strong className="text-sm text-white">First Last</strong></span><span>Expire date<br /><strong className="text-sm text-white">06/29</strong></span></div>}
       </div>
     </div>
@@ -121,9 +121,9 @@ function Donut({ card }: { card: WalletCard }) {
   );
 
   return (
-    <div className="relative mx-auto grid h-40 w-40 place-items-center rounded-full shadow-sm" style={{ background: `conic-gradient(${stops.parts.join(', ')})` }}>
-      <div className="grid h-[106px] w-[106px] place-items-center rounded-full bg-white text-center shadow-inner">
-        <strong className="text-lg">{money.format(card.currentBalance)}</strong>
+    <div className="relative mx-auto grid h-28 w-28 place-items-center rounded-full shadow-sm" style={{ background: `conic-gradient(${stops.parts.join(', ')})` }}>
+      <div className="grid h-[76px] w-[76px] place-items-center rounded-full bg-white text-center shadow-inner">
+        <strong className="text-sm">{money.format(card.currentBalance)}</strong>
       </div>
     </div>
   );
@@ -185,24 +185,24 @@ export default function WalletDashboard({ initialCards }: { initialCards: Wallet
             </section>
           ) : (
           <section className="mt-3 rounded-[28px] bg-[#ececec] p-3 shadow-md">
-            <div className="grid auto-rows-[116px] gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:thin]">
               {cards.map((card) => (
-                <button key={card.id} type="button" onClick={() => focusCard(card.id)} className={`h-full w-full min-w-0 overflow-hidden rounded-xl bg-white p-3 text-left shadow-sm transition ${focusedCardId === card.id ? 'ring-2 ring-[#6cb1ff]' : 'hover:-translate-y-0.5'}`}>
-                  <div className="flex gap-3"><CreditCardVisual card={card} compact /><div className="w-[125px] shrink-0 overflow-hidden pt-1"><span className={`float-right ${currentCardId === card.id ? 'text-[#2865e9]' : 'text-slate-300'}`}>★</span><h2 className="truncate text-sm font-bold">{card.name}</h2><p className="mt-1 truncate text-xs">{money.format(card.currentBalance)} this month</p><p className="truncate text-xs text-slate-600">{card.reward}</p></div></div>
+                <button key={card.id} type="button" onClick={() => focusCard(card.id)} className={`h-[116px] w-[330px] shrink-0 overflow-hidden rounded-xl bg-white p-3 text-left shadow-sm transition ${focusedCardId === card.id ? 'ring-2 ring-[#6cb1ff]' : 'hover:-translate-y-0.5'}`}>
+                  <div className="flex gap-3"><CreditCardVisual card={card} compact /><div className="w-[125px] shrink-0 overflow-hidden pt-1"><span className={`float-right ${currentCardId === card.id ? 'text-[#2865e9]' : 'text-slate-300'}`}>★</span><h2 className="truncate text-sm font-bold">{card.name}</h2><p className="mt-1 truncate text-xs">{money.format(card.currentBalance)} this month</p><p className="truncate text-xs text-slate-500">•• {card.lastFour}</p></div></div>
                 </button>
               ))}
             </div>
           </section>
           )}
 
-          <section className="mt-4 space-y-4">
+          <section className="mt-4 space-y-3">
             {cards.map((card) => {
               const usage = Math.min((card.currentBalance / card.limit) * 100, 100);
               const isCurrentCard = currentCardId === card.id;
               return (
-                <article id={`wallet-card-${card.id}`} key={card.id} className={`relative scroll-mt-6 rounded-[28px] border bg-white p-5 shadow-md transition ${focusedCardId === card.id ? 'border-[#a8ccff] ring-1 ring-[#e1efff]' : 'border-slate-100'}`}>
+                <article id={`wallet-card-${card.id}`} key={card.id} className={`relative scroll-mt-6 rounded-[24px] border bg-white p-4 shadow-md transition ${focusedCardId === card.id ? 'border-[#a8ccff] ring-1 ring-[#e1efff]' : 'border-slate-100'}`}>
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-2"><h2 className="text-2xl font-bold">{card.name}</h2>{isCurrentCard && <span className="text-xl text-[#2865e9]">★</span>}</div>
+                    <div className="flex items-center gap-2"><h2 className="text-xl font-bold">{card.name}</h2>{isCurrentCard && <span className="text-lg text-[#2865e9]">★</span>}</div>
                     <button type="button" onClick={() => { setCurrentCardId(card.id); setFocusedCardId(card.id); }} aria-pressed={isCurrentCard} className="shrink-0 text-center">
                       <span className={`flex h-5 w-16 overflow-hidden rounded-full ${isCurrentCard ? 'bg-[#a9c9ff]' : 'bg-[#eeeeee]'}`} aria-hidden="true">
                         <span className={`h-full w-8 rounded-full ${isCurrentCard ? 'ml-auto bg-[#2865e9]' : 'bg-[#cfcfcf]'}`} />
@@ -210,13 +210,13 @@ export default function WalletDashboard({ initialCards }: { initialCards: Wallet
                       <span className="mt-1 block text-[11px] font-medium text-slate-600">Current card</span>
                     </button>
                   </div>
-                  <div className="mt-4 grid gap-6 xl:grid-cols-[330px_minmax(260px,1fr)_190px] xl:items-center">
+                  <div className="mt-3 grid gap-4 xl:grid-cols-[270px_minmax(220px,1fr)_175px] xl:items-center">
                     <CreditCardVisual card={card} />
-                    <div className="border-y border-slate-200 py-5 xl:border-x xl:border-y-0 xl:px-8">
-                      <div className="grid gap-4 sm:grid-cols-[170px_1fr] sm:items-center"><Donut card={card} /><div className="space-y-2">{card.categories.slice(0, 6).map((category) => <div key={category.label} className="rounded-lg bg-slate-50 px-2 py-1.5 text-xs"><span className="mr-1.5 inline-block h-2 w-2 rounded-full" style={{ backgroundColor: category.color }} />{category.label} - {money.format(category.amount)}</div>)}</div></div>
-                      <div className="mt-5"><div className="h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2784c6]" style={{ width: `${usage}%` }} /></div><div className="mt-2 flex justify-between text-sm"><span>Weekly payment limit</span><span>{money.format(card.currentBalance)} / {money.format(card.limit)}</span></div></div>
+                    <div className="border-y border-slate-200 py-3 xl:border-x xl:border-y-0 xl:px-5">
+                      <div className="grid gap-3 sm:grid-cols-[120px_1fr] sm:items-center"><Donut card={card} /><div className="space-y-1.5">{card.categories.slice(0, 3).map((category) => <div key={category.label} className="rounded-lg bg-slate-50 px-2 py-1.5 text-xs"><span className="mr-1.5 inline-block h-2 w-2 rounded-full" style={{ backgroundColor: category.color }} />{category.label} - {money.format(category.amount)}</div>)}</div></div>
+                      <div className="mt-3"><div className="h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2784c6]" style={{ width: `${usage}%` }} /></div><div className="mt-1.5 flex justify-between text-xs"><span>Credit limit</span><span>{money.format(card.currentBalance)} / {money.format(card.limit)}</span></div></div>
                     </div>
-                    <div className="text-right"><p className="text-sm text-[#1875b7]">$ <strong className="text-4xl">{card.limit.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></p><p className="text-xs text-slate-400">Current balance</p><div className="mt-10 space-y-4 text-xs"><p>{card.reward.split('•')[0]} <span className="float-right">{Math.round(card.limit * 13.7).toLocaleString()}px</span></p><div className="h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2585c5]" style={{ width: `${Math.max(usage, 8)}%` }} /></div><p>{card.reward.split('•')[1] ?? 'Available credit'} <span className="float-right">6,117px</span></p><div className="h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2585c5]" style={{ width: '10%' }} /></div></div></div>
+                    <div className="text-right"><p className="text-xs text-[#1875b7]">$ <strong className="text-3xl">{card.limit.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></p><p className="text-xs text-slate-400">Credit limit</p><div className="mt-5 space-y-2 text-xs"><p>{money.format(Math.max(card.limit - card.currentBalance, 0))} available</p><div className="h-2.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2585c5]" style={{ width: `${Math.max(usage, 8)}%` }} /></div><p>{Math.round(usage)}% of limit used</p></div></div>
                   </div>
                 </article>
               );
