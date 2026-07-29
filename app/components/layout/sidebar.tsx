@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+
+// icons imports for dashboard
+// notes: similar "Subscription" icon missing from lucide so using another card-like icon
 import {
   Bot,
   ChartPie,
@@ -15,7 +18,9 @@ import {
   Settings,
   WalletCards,
 } from "lucide-react";
+
 import { createClient } from "@/lib/supabase/client";
+
 
 const links = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -27,7 +32,10 @@ const links = [
 ];
 
 export default function Sidebar() {
+  
+   // set default sidebar to open
   const [isOpen, setIsOpen] = useState(true);
+  
   const pathname = usePathname();
   const router = useRouter();
 
@@ -38,13 +46,14 @@ export default function Sidebar() {
     router.refresh();
   }
 
+  // using ternary op. --> if sidebar is open then make width 64, o/w use width of 20 w/ icons
   return (
     <nav
       className={`relative flex min-h-screen flex-col border-r border-gray-200 bg-[#E9F1FF] p-4 transition-all duration-300 ${
         isOpen ? "w-64" : "w-20"
       }`}
     >
-      <div className={`mb-6 flex items-center gap-3 ${!isOpen ? "justify-center" : ""}`}>
+      <div className={`mb-6 flex items-center ${!isOpen ? "justify-center" : ""}`}>
         <Image
           src="/pockit_logo.png"
           alt="Pockit"
@@ -58,7 +67,6 @@ export default function Sidebar() {
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
         className="absolute -right-3 top-6 rounded-full border border-gray-200 bg-white p-1 shadow-sm transition-colors hover:bg-gray-100"
       >
         {isOpen ? <ChevronLeft className="h-4 w-4 text-[#1F78FF]" /> : <ChevronRight className="h-4 w-4 text-[#1F78FF]" />}
