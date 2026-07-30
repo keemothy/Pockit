@@ -8,19 +8,128 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #ffffff;
-  }
+  --font-mono: var(--font-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
 }
+
+/* ── Aurora blob keyframes (login left panel) ────────────── */
+@keyframes aurora-1 {
+  0%,  100% { transform: translate(0px,   0px)  scale(1);    }
+  25%        { transform: translate(80px, -60px) scale(1.12); }
+  50%        { transform: translate(-50px, 40px) scale(0.92); }
+  75%        { transform: translate(40px,  60px) scale(1.08); }
+}
+@keyframes aurora-2 {
+  0%,  100% { transform: translate(0px,   0px)  scale(1.1); }
+  30%        { transform: translate(-80px, 50px) scale(0.9); }
+  65%        { transform: translate(70px, -40px) scale(1.2); }
+}
+@keyframes aurora-3 {
+  0%,  100% { transform: translate(0px,   0px)   scale(0.95); }
+  40%        { transform: translate(60px,  70px)  scale(1.1);  }
+  70%        { transform: translate(-40px,-60px)  scale(0.85); }
+}
+@keyframes aurora-4 {
+  0%,  100% { transform: translate(0px,   0px)  scale(1.05); }
+  35%        { transform: translate(-70px,-50px) scale(0.9);  }
+  65%        { transform: translate(50px,  30px) scale(1.15); }
+}
+
+/* ── Animated gradient border (@property) ─────────────── */
+@property --gradient-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes spin-gradient {
+  to { --gradient-angle: 360deg; }
+}
+.gradient-border-card {
+  position: relative;
+  padding: 1px;
+  border-radius: 28px;
+  background: conic-gradient(
+    from var(--gradient-angle),
+    #1F78FF 0deg,
+    #a855f7 90deg,
+    #ec4899 180deg,
+    #22d3ee 270deg,
+    #1F78FF 360deg
+  );
+  animation: spin-gradient 12s linear infinite;
+}
+
+/* ── Animated gradient text ────────────────────────────── */
+@keyframes gradient-text-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+.animated-gradient-text {
+  background-image: linear-gradient(90deg, #57BEFE 0%, #a855f7 35%, #ec4899 65%, #57BEFE 100%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-text-shift 6s ease-in-out infinite;
+}
+
+/* ── Noise texture overlay ─────────────────────────────── */
+.noise-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.055;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ── Dashboard page background texture ────────────────── */
+.dashboard-texture::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.022;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Shimmer skeleton ──────────────────────────────────── */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%);  }
+}
+.skeleton {
+  position: relative;
+  background-color: #e8edf5;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.75), transparent);
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* ── Floating pill animation (AI card prompts) ─────────── */
+@keyframes pill-float {
+  0%, 100% { transform: translateY(0px); }
+  50%        { transform: translateY(-5px); }
+}
+.pill-float-1 { animation: pill-float 3.6s ease-in-out infinite; }
+.pill-float-2 { animation: pill-float 3.6s ease-in-out infinite 0.65s; }
+.pill-float-3 { animation: pill-float 3.6s ease-in-out infinite 1.3s; }
+
+/* ── Stat card accent top border ───────────────────────── */
+.card-accent-blue::before  { content:''; position:absolute; inset-inline:0; top:0; height:3px; border-radius:20px 20px 0 0; background:linear-gradient(90deg,#1F78FF,#57BEFE); }
+.card-accent-amber::before { content:''; position:absolute; inset-inline:0; top:0; height:3px; border-radius:20px 20px 0 0; background:linear-gradient(90deg,#f59e0b,#fbbf24); }
+.card-accent-violet::before{ content:''; position:absolute; inset-inline:0; top:0; height:3px; border-radius:20px 20px 0 0; background:linear-gradient(90deg,#7c3aed,#a855f7); }
+.card-accent-emerald::before{ content:''; position:absolute; inset-inline:0; top:0; height:3px; border-radius:20px 20px 0 0; background:linear-gradient(90deg,#059669,#34d399); }
