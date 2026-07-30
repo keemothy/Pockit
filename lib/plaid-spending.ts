@@ -61,32 +61,15 @@ export async function getSpendingCategories(
         },
       });
 
-      // Development-only inspection aid. Transactions remain in memory and
-      // are never persisted; do not enable this log in production.
-      if (process.env.NODE_ENV !== 'production') {
-        console.info('Plaid Wallet transactions response', {
-          plaidItemId: item.id,
-          requestedAccountIds: linkedAccounts.map((account) => account.plaidAccountId),
-          totalTransactions: response.data.total_transactions,
-          transactions: response.data.transactions,
-        });
-      }
-
       for (const transaction of response.data.transactions) {
         if (transaction.amount <= 0) continue;
         const category = transaction.personal_finance_category?.primary ?? 'OTHER';
         const key = `${transaction.account_id}:${category}`;
         totals.set(key, (totals.get(key) ?? 0) + transaction.amount);
       }
-    } catch (error) {
+    } catch {
       // One institution can still be preparing Transactions data. Do not let
       // that suppress spending summaries for the user's other connected cards.
-      if (process.env.NODE_ENV !== 'production') {
-        console.info('Plaid Wallet skipped an unavailable connection', {
-          plaidItemId: item.id,
-          message: error instanceof Error ? error.message : 'Unknown Plaid error',
-        });
-      }
     }
   }));
 
@@ -98,10 +81,6 @@ export async function getSpendingCategories(
       amount,
     };
   });
-
-  if (process.env.NODE_ENV !== 'production') {
-    console.info('Plaid Wallet category totals', categories);
-  }
 
   return categories;
 }

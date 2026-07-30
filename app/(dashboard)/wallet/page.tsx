@@ -114,14 +114,6 @@ export default async function WalletPage() {
     (account) => plaidItemEnvironments[account.plaid_item_id] === activePlaidEnvironment,
   );
   const creditCardAccounts = activeAccounts.filter((account) => account.type?.toLowerCase() === 'credit');
-  if (process.env.NODE_ENV !== 'production') {
-    console.info('Plaid Wallet saved card names', creditCardAccounts.map((account) => ({
-      accountId: account.plaid_account_id,
-      name: account.name,
-      officialName: account.official_name,
-      mask: account.mask,
-    })));
-  }
   const connectedBanks = Object.values(activeAccounts.reduce<Record<string, ConnectedPlaidBank>>(
     (banks, account) => {
       const existing = banks[account.plaid_item_id];
