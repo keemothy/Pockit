@@ -118,11 +118,7 @@ export default async function WalletPage() {
   const cardIdentityOverrides = readCardIdentityOverrides(userMetadata);
   const plaidItemEnvironments = readPlaidItemEnvironments(userMetadata);
   const activePlaidEnvironment = getPlaidEnvironment();
-  const spendingPeriodLabel = new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'America/Los_Angeles',
-  }).format(new Date());
+  const spendingPeriodLabel = 'Last 90 days';
 
   const { data: accounts } = await supabase
     .from('financial_accounts')

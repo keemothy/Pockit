@@ -14,9 +14,10 @@ type CreditAccount = {
   plaidItemId: string;
 };
 
-function isoDateMonthStart() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+function isoDateDaysAgo(days: number) {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() - days);
+  return date.toISOString().slice(0, 10);
 }
 
 /**
@@ -51,8 +52,8 @@ export async function getSpendingCategories(
 
       const response = await plaidClient.transactionsGet({
         access_token: accessToken,
-        // The wallet donut is a calendar-month summary, not a rolling window.
-        start_date: isoDateMonthStart(),
+        // Plaid supports a 90-day history window; keep Wallet aligned with it.
+        start_date: isoDateDaysAgo(90),
         end_date: new Date().toISOString().slice(0, 10),
         options: {
           account_ids: linkedAccounts.map((account) => account.plaidAccountId),
