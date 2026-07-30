@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { CountryCode, Products } from "plaid";
+import { CountryCode, CreditAccountSubtype, Products } from "plaid";
 import { hasPlaidCredentials, plaidClient } from "@/lib/plaid";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,6 +25,11 @@ export async function POST() {
       country_codes: [CountryCode.Us],
       language: "en",
       products: [Products.Transactions],
+      // Wallets tracks credit cards only. Restrict Link before authorization so
+      // checking, savings, and other account types are never added to the Item.
+      account_filters: {
+        credit: { account_subtypes: [CreditAccountSubtype.CreditCard] },
+      },
       user: { client_user_id: user.id },
     });
 

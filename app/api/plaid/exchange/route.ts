@@ -28,6 +28,16 @@ export async function POST(request: NextRequest) {
   try {
     const exchange = await plaidClient.itemPublicTokenExchange({ public_token: body.publicToken });
     const accounts = await plaidClient.accountsGet({ access_token: exchange.data.access_token });
+    const creditCardAccounts = accounts.data.accounts.filter(
+      (account) => account.type === "credit" && account.subtype === "credit card",
+    );
+    if (creditCardAccounts.length === 0) {
+      await plaidClient.itemRemove({ access_token: exchange.data.access_token });
+      return NextResponse.json(
+        { error: "No credit card account was selected. Connect a bank with a credit card to continue." },
+        { status: 422 },
+      );
+    }
     const encryptedToken = encryptAccessToken(exchange.data.access_token);
     const admin = createAdminClient();
 
@@ -45,7 +55,10 @@ export async function POST(request: NextRequest) {
 
     if (itemError || !plaidItem) throw itemError ?? new Error("Unable to save the connected bank.");
 
-    const accountRows = accounts.data.accounts.map((account) => ({
+    // Link filters prevent non-credit accounts from being authorized for new
+    // Items. Keep the same rule here as a server-side safeguard before any
+    // account summary is persisted in Supabase.
+    const accountRows = creditCardAccounts.map((account) => ({
       user_id: user.id,
       plaid_item_id: plaidItem.id,
       plaid_account_id: account.account_id,
@@ -64,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       itemId: exchange.data.item_id,
-      accounts: accounts.data.accounts.map((account) => ({
+      accounts: creditCardAccounts.map((account) => ({
         id: account.account_id,
         name: account.name,
         officialName: account.official_name,
