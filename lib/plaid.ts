@@ -1,6 +1,14 @@
 import { Configuration, PlaidApi, PlaidEnvironments } from "plaid";
 
-const environment = process.env.PLAID_ENV ?? "sandbox";
+export type PlaidEnvironment = "sandbox" | "development" | "production";
+
+export function getPlaidEnvironment(): PlaidEnvironment {
+  const environment = process.env.PLAID_ENV ?? "sandbox";
+  if (environment === "production" || environment === "development") return environment;
+  return "sandbox";
+}
+
+const environment = getPlaidEnvironment();
 
 const plaidEnvironment =
   environment === "production"
