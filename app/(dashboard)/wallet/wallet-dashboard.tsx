@@ -24,6 +24,7 @@ export type WalletCard = {
   catalogCardId?: string;
   hasSpendingData: boolean;
   categories: { label: string; amount: number; color: string }[];
+  monthlyCategories?: Record<string, { label: string; amount: number; color: string }[]>;
   isManual?: boolean;
 };
 
@@ -83,6 +84,11 @@ const spendingCategoryOptions = [
   'Loan payments', 'Personal care', 'Other',
 ];
 const manualCategoryColors = ['#2184c7', '#ff9a57', '#9747ba', '#aac437', '#efc93c', '#ff626a'];
+
+function currentMonthKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
 
 // The donut center and the unmatched-card fallback both use this one total,
 // so the displayed monthly amount cannot drift from the category data.
@@ -178,6 +184,7 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
   const [balance, setBalance] = useState('');
   const [creditLimit, setCreditLimit] = useState('');
   const [newCategories, setNewCategories] = useState<WalletCard['categories']>([]);
+  const [newSpendingMonth, setNewSpendingMonth] = useState(currentMonthKey());
   const [catalogCards, setCatalogCards] = useState<CatalogCard[]>([]);
   const [cardMatcherCard, setCardMatcherCard] = useState<WalletCard | null>(null);
   const [catalogSearch, setCatalogSearch] = useState('');
@@ -193,6 +200,9 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
   const [manualBalance, setManualBalance] = useState('');
   const [manualLimit, setManualLimit] = useState('');
   const [manualCategories, setManualCategories] = useState<WalletCard['categories']>([]);
+  const [manualSpendingMonth, setManualSpendingMonth] = useState(currentMonthKey());
+  const [manualCardError, setManualCardError] = useState('');
+  const [isSavingManualCard, setIsSavingManualCard] = useState(false);
   const [disconnectingItemId, setDisconnectingItemId] = useState('');
   const [disconnectError, setDisconnectError] = useState('');
 
@@ -212,26 +222,42 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
       .catch(() => setCatalogCards([]));
   }, [isModalOpen, cardMatcherCard, catalogCards.length]);
 
-  function addCard(event: FormEvent<HTMLFormElement>) {
+  async function addCard(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const normalizedLastFour = lastFour.replace(/\D/g, '').slice(-4);
     const parsedBalance = Number.parseFloat(balance);
     const parsedLimit = Number.parseFloat(creditLimit);
-    if (!name.trim() || normalizedLastFour.length !== 4 || Number.isNaN(parsedBalance) || Number.isNaN(parsedLimit) || parsedLimit <= 0) return;
+    if (!name.trim() || normalizedLastFour.length !== 4 || Number.isNaN(parsedBalance) || Number.isNaN(parsedLimit) || parsedLimit <= 0) {
+      setManualCardError('Enter valid card details before saving.');
+      return;
+    }
 
     const catalogMatch = catalogCards.find((catalogCard) => cardCatalogMatchesName(catalogCard, name));
-    const card: WalletCard = {
-      id: crypto.randomUUID(), name: catalogMatch ? displayCatalogCardName(catalogMatch) : name.trim(), issuer: 'CREDIT CARD', lastFour: normalizedLastFour,
-      cardholderName, currentBalance: parsedBalance, limit: parsedLimit, color: 'blue',
-      rewardDetails: catalogRewardDetails(catalogMatch), rewardsMatched: Boolean(catalogMatch),
-      hasSpendingData: newCategories.some((category) => category.amount > 0),
-      categories: newCategories.filter((category) => category.amount > 0).map((category, index) => ({ ...category, color: manualCategoryColors[index % manualCategoryColors.length] })),
-      isManual: true,
-    };
-    setCards((currentCards) => [...currentCards, card]);
-    setFocusedCardId(card.id);
-    setCurrentCardId(card.id);
-    setName(''); setLastFour(''); setBalance(''); setCreditLimit(''); setNewCategories([]); setIsModalOpen(false);
+    const categories = newCategories.filter((category) => category.amount > 0).map((category, index) => ({ ...category, color: manualCategoryColors[index % manualCategoryColors.length] }));
+    const selectedMonth = window.prompt('Spending month (YYYY-MM)', newSpendingMonth)?.trim();
+    if (!selectedMonth || !/^\d{4}-(0[1-9]|1[0-2])$/.test(selectedMonth)) {
+      setManualCardError('Enter a spending month in YYYY-MM format.');
+      return;
+    }
+    setIsSavingManualCard(true);
+    setManualCardError('');
+    try {
+      const response = await fetch('/api/cards/manual', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: catalogMatch ? displayCatalogCardName(catalogMatch) : name.trim(), lastFour: normalizedLastFour, currentBalance: parsedBalance, creditLimit: parsedLimit, categories, spendingMonth: selectedMonth, catalogCardId: catalogMatch?.cardId }),
+      });
+      const payload = (await response.json()) as { card?: { id: string }; error?: string };
+      if (!response.ok || !payload.card) throw new Error(payload.error ?? 'Unable to save this card.');
+      const card: WalletCard = { id: payload.card.id, name: catalogMatch ? displayCatalogCardName(catalogMatch) : name.trim(), issuer: 'CREDIT CARD', lastFour: normalizedLastFour, cardholderName, currentBalance: parsedBalance, limit: parsedLimit, color: 'blue', rewardDetails: catalogRewardDetails(catalogMatch), rewardsMatched: Boolean(catalogMatch), catalogCardId: catalogMatch?.cardId, hasSpendingData: categories.length > 0, categories, isManual: true };
+      setCards((currentCards) => [...currentCards, card]);
+      setFocusedCardId(card.id); setCurrentCardId(card.id);
+      setName(''); setLastFour(''); setBalance(''); setCreditLimit(''); setNewCategories([]); setNewSpendingMonth(currentMonthKey()); setIsModalOpen(false);
+      router.refresh();
+    } catch (error) {
+      setManualCardError(error instanceof Error ? error.message : 'Unable to save this card.');
+    } finally {
+      setIsSavingManualCard(false);
+    }
   }
 
   function refreshSpending() {
@@ -322,7 +348,9 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
     setManualName(card.name);
     setManualBalance(String(card.currentBalance));
     setManualLimit(String(card.limit));
-    setManualCategories(card.categories);
+    const month = currentMonthKey();
+    setManualSpendingMonth(month);
+    setManualCategories(card.monthlyCategories?.[month] ?? card.categories);
   }
 
   function updateManualCategory(index: number, field: 'label' | 'amount', value: string) {
@@ -341,23 +369,53 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
     )));
   }
 
-  function saveManualCard() {
+  async function saveManualCard() {
     if (!manualEditorCard) return;
     const parsedBalance = Number.parseFloat(manualBalance);
     const parsedLimit = Number.parseFloat(manualLimit);
-    if (!manualName.trim() || Number.isNaN(parsedBalance) || Number.isNaN(parsedLimit) || parsedLimit <= 0) return;
+    if (!manualName.trim() || Number.isNaN(parsedBalance) || Number.isNaN(parsedLimit) || parsedLimit <= 0) {
+      setManualCardError('Enter valid card details before saving.');
+      return;
+    }
     const categories = manualCategories
       .filter((category) => category.amount > 0)
       .map((category, index) => ({ ...category, color: manualCategoryColors[index % manualCategoryColors.length] }));
-    setCards((currentCards) => currentCards.map((card) => card.id === manualEditorCard.id ? {
-      ...card,
-      name: manualName.trim(),
-      currentBalance: parsedBalance,
-      limit: parsedLimit,
-      categories,
-      hasSpendingData: categories.length > 0,
-    } : card));
-    setManualEditorCard(null);
+    const selectedMonth = window.prompt('Spending month (YYYY-MM)', manualSpendingMonth)?.trim();
+    if (!selectedMonth || !/^\d{4}-(0[1-9]|1[0-2])$/.test(selectedMonth)) {
+      setManualCardError('Enter a spending month in YYYY-MM format.');
+      return;
+    }
+    setIsSavingManualCard(true);
+    setManualCardError('');
+    try {
+      const response = await fetch('/api/cards/manual', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: manualEditorCard.id, name: manualName.trim(), lastFour: manualEditorCard.lastFour, currentBalance: parsedBalance, creditLimit: parsedLimit, categories, spendingMonth: selectedMonth, catalogCardId: manualEditorCard.catalogCardId }),
+      });
+      const payload = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? 'Unable to update this card.');
+      setCards((currentCards) => currentCards.map((card) => card.id === manualEditorCard.id ? { ...card, name: manualName.trim(), currentBalance: parsedBalance, limit: parsedLimit, categories: selectedMonth === currentMonthKey() ? categories : card.categories, monthlyCategories: { ...card.monthlyCategories, [selectedMonth]: categories }, hasSpendingData: selectedMonth === currentMonthKey() ? categories.length > 0 : card.hasSpendingData } : card));
+      setManualEditorCard(null);
+      router.refresh();
+    } catch (error) {
+      setManualCardError(error instanceof Error ? error.message : 'Unable to update this card.');
+    } finally {
+      setIsSavingManualCard(false);
+    }
+  }
+
+  async function deleteManualCard(card: WalletCard) {
+    setManualCardError('');
+    try {
+      const response = await fetch('/api/cards/manual', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: card.id }) });
+      const payload = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? 'Unable to delete this card.');
+      setCards((currentCards) => currentCards.filter((currentCard) => currentCard.id !== card.id));
+      setFocusedCardId((id) => id === card.id ? '' : id); setCurrentCardId((id) => id === card.id ? '' : id);
+      router.refresh();
+    } catch (error) {
+      setManualCardError(error instanceof Error ? error.message : 'Unable to delete this card.');
+    }
   }
 
   function updateReward(index: number, field: 'label' | 'multiplier', value: string) {
@@ -398,6 +456,7 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
 
   return (
     <div className="w-full min-w-0 bg-white text-[#121926]">
+      {isSavingManualCard && <p className="fixed bottom-4 right-4 z-50 rounded-lg bg-slate-900 px-3 py-2 text-sm text-white shadow-lg">Saving card…</p>}
       <main className="w-full min-w-0">
           <header className="flex items-start justify-between gap-4">
             <div><h1 className="text-3xl font-bold tracking-tight">Wallets</h1><p className="mt-1 text-sm text-slate-500">Track credit card usage, and monthly expenses.</p></div>
@@ -481,7 +540,7 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
                   {cards.filter((card) => card.isManual || card.issuer === 'POCKIT CARD').map((card) => (
                     <div key={card.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3">
                       <div className="min-w-0"><p className="truncate text-sm font-semibold">{card.name}</p><p className="text-xs text-slate-500">•••• {card.lastFour} · Manual card</p></div>
-                      <button type="button" onClick={() => { setCards((currentCards) => currentCards.filter((currentCard) => currentCard.id !== card.id)); setFocusedCardId((id) => id === card.id ? '' : id); setCurrentCardId((id) => id === card.id ? '' : id); }} className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">Delete</button>
+                      <button type="button" onClick={() => void deleteManualCard(card)} className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">Delete</button>
                     </div>
                   ))}
                 </div>
@@ -500,7 +559,7 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
                 </div>
               )}
             </div>
-            {disconnectError && <p role="alert" className="mt-3 text-sm text-red-600">{disconnectError}</p>}
+            {(disconnectError || manualCardError) && <p role="alert" className="mt-3 text-sm text-red-600">{disconnectError || manualCardError}</p>}
             <p className="mt-4 text-xs text-slate-500">Disconnecting a bank revokes its Plaid connection and removes every connected account from Wallets. Manual cards can be deleted individually.</p>
           </div>
         </div>
