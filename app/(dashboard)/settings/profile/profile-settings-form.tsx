@@ -135,8 +135,8 @@ export default function ProfileSettingsForm({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setStatus("Choose a JPG, PNG, or WebP image.");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setStatus("Choose a JPG or PNG image.");
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
@@ -165,7 +165,6 @@ export default function ProfileSettingsForm({
             <Link
               key={tab.href}
               href={tab.href}
-              aria-current={active ? "page" : undefined}
               className={`shrink-0 border-b-2 px-3 py-3 text-sm font-medium transition-colors ${
                 active
                   ? "border-blue-600 text-blue-600"
@@ -182,8 +181,9 @@ export default function ProfileSettingsForm({
         <div className="flex items-center gap-4">
           <div
             className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-blue-100 bg-cover bg-center text-2xl font-semibold text-blue-600"
-            style={avatarUrl ? { backgroundImage: `url("${avatarUrl}")` } : undefined}
-            aria-label={`${displayName}'s profile picture`}
+            style={
+              avatarUrl ? { backgroundImage: `url("${avatarUrl}")` } : undefined
+            }
             role="img"
           >
             {!avatarUrl && initials}
@@ -302,11 +302,7 @@ export default function ProfileSettingsForm({
         </fieldset>
 
         <div className="mt-8 flex flex-col-reverse gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p
-            role="status"
-            aria-live="polite"
-            className="text-sm text-slate-500"
-          >
+          <p role="status" className="text-sm text-slate-500">
             {status ?? "Changes are saved securely to your Pockit account."}
           </p>
           <button
@@ -342,8 +338,6 @@ function Toggle({
       <button
         type="button"
         role="switch"
-        aria-checked={enabled}
-        aria-label={label}
         onClick={() => onChange(!enabled)}
         className={`relative h-7 w-12 shrink-0 cursor-pointer rounded-full transition-colors ${
           enabled ? "bg-blue-600" : "bg-slate-300"
