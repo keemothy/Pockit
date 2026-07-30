@@ -80,6 +80,26 @@ function displayCategory(category: string) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function readManualCategoryList(value: unknown) {
+  if (!Array.isArray(value)) return [] as WalletCard['categories'];
+  return value.flatMap((category, index) => {
+    if (!category || typeof category !== 'object') return [];
+    const candidate = category as Record<string, unknown>;
+    return typeof candidate.label === 'string' && typeof candidate.amount === 'number' && candidate.amount > 0
+      ? [{ label: candidate.label, amount: candidate.amount, color: categoryColors[index % categoryColors.length] }]
+      : [];
+  });
+}
+
+function readManualCategories(value: unknown) {
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  if (Array.isArray(value)) return { [currentMonth]: readManualCategoryList(value) };
+  if (!value || typeof value !== 'object') return {} as Record<string, WalletCard['categories']>;
+  return Object.fromEntries(Object.entries(value).flatMap(([month, categories]) => (
+    /^\d{4}-(0[1-9]|1[0-2])$/.test(month) ? [[month, readManualCategoryList(categories)]] : []
+  )));
+}
+
 export default async function WalletPage() {
   const supabase = await createClient();
   const {
@@ -98,17 +118,19 @@ export default async function WalletPage() {
   const cardIdentityOverrides = readCardIdentityOverrides(userMetadata);
   const plaidItemEnvironments = readPlaidItemEnvironments(userMetadata);
   const activePlaidEnvironment = getPlaidEnvironment();
-  const spendingPeriodLabel = new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'America/Los_Angeles',
-  }).format(new Date());
+  const spendingPeriodLabel = 'Last 90 days';
 
   const { data: accounts } = await supabase
     .from('financial_accounts')
     .select('id, plaid_item_id, plaid_account_id, name, official_name, type, subtype, mask, current_balance, available_balance, credit_limit, iso_currency_code')
     .eq('user_id', user.id)
     .order('name');
+
+  const { data: manualCards } = await supabase
+    .from('manual_cards')
+    .select('id, name, last_four, current_balance, credit_limit, spending_categories, catalog_card_id')
+    .eq('user_id', user.id)
+    .order('created_at');
 
   const activeAccounts = (accounts ?? []).filter(
     (account) => plaidItemEnvironments[account.plaid_item_id] === activePlaidEnvironment,
@@ -137,7 +159,7 @@ export default async function WalletPage() {
 
   const catalog = await getCardCatalog().catch(() => []);
 
-  const cards: WalletCard[] = creditCardAccounts.map((account, index) => {
+  const connectedCards: WalletCard[] = creditCardAccounts.map((account, index) => {
     const balance = Math.max(Number(account.current_balance) || 0, 0);
     const available = Math.max(Number(account.available_balance) || 0, 0);
     const reportedLimit = Math.max(Number(account.credit_limit) || 0, 0);
@@ -197,6 +219,41 @@ export default async function WalletPage() {
       categories,
     };
   });
+
+  const savedManualCards: WalletCard[] = (manualCards ?? []).map((card, index) => {
+    const catalogCard = card.catalog_card_id ? catalog.find((catalogEntry) => catalogEntry.cardId === card.catalog_card_id) : undefined;
+    const rules = getRewardRulesForCard(catalogCard?.cardId);
+    const catalogRewardDetails = rules.map((rule) => ({
+      label: rule.category.replace(/-/g, ' '),
+      multiplier: rule.multiplier,
+      rewardCurrency: rule.rewardCurrency,
+    }));
+    if (catalogRewardDetails.length === 0 && catalogCard?.universalCashbackPercent) {
+      catalogRewardDetails.push({ label: 'base rewards', multiplier: catalogCard.universalCashbackPercent, rewardCurrency: 'CASH_BACK' });
+    }
+    const hasRewardOverride = Object.hasOwn(rewardOverrides, card.id);
+    const monthlyCategories = readManualCategories(card.spending_categories);
+    const categories = monthlyCategories[new Date().toISOString().slice(0, 7)] ?? [];
+    return {
+      id: card.id,
+      name: catalogCard ? displayCatalogCardName(catalogCard) : card.name,
+      issuer: 'CREDIT CARD',
+      lastFour: card.last_four,
+      cardholderName,
+      currentBalance: Math.max(Number(card.current_balance) || 0, 0),
+      limit: Math.max(Number(card.credit_limit) || 1, 1),
+      color: index % 3 === 0 ? 'blue' : index % 3 === 1 ? 'rainbow' : 'black',
+      rewardDetails: hasRewardOverride ? rewardOverrides[card.id] : catalogRewardDetails,
+      rewardsMatched: Boolean(catalogCard) || hasRewardOverride,
+      catalogCardId: catalogCard?.cardId,
+      hasSpendingData: categories.length > 0,
+      categories,
+      monthlyCategories,
+      isManual: true,
+    };
+  });
+
+  const cards = [...connectedCards, ...savedManualCards];
 
   return (
     <WalletDashboard

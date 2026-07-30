@@ -64,6 +64,8 @@ async function fetchAllTransactions(
   if (error || !items) return [];
 
   type TxnRow = {
+    transaction_id: string;
+    name: string;
     amount: number;
     merchant_name?: string | null;
     date: string;
@@ -99,6 +101,41 @@ async function fetchAllTransactions(
   );
 
   return all;
+}
+
+export type PlaidAnalyticsTransaction = {
+  id: string;
+  accountId: string;
+  name: string;
+  merchantName: string | null;
+  amount: number;
+  date: string;
+  category: string;
+  detailedCategory: string | null;
+};
+
+/** Recent, presentation-safe Plaid transactions for the detailed analytics page. */
+export async function getPlaidAnalyticsTransactions(
+  userId: string,
+  accounts: CreditAccount[],
+  days = 180,
+): Promise<PlaidAnalyticsTransaction[]> {
+  const endDate = new Date().toISOString().slice(0, 10);
+  const startDate = new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10);
+  const transactions = await fetchAllTransactions(userId, accounts, startDate, endDate);
+  return transactions
+    .filter((transaction) => transaction.amount > 0)
+    .map((transaction) => ({
+      id: transaction.transaction_id,
+      accountId: transaction.account_id,
+      name: transaction.name,
+      merchantName: transaction.merchant_name ?? null,
+      amount: transaction.amount,
+      date: transaction.date,
+      category: transaction.personal_finance_category?.primary ?? "OTHER",
+      detailedCategory: transaction.personal_finance_category?.detailed ?? null,
+    }))
+    .sort((first, second) => second.date.localeCompare(first.date));
 }
 
 /** Spending aggregated by primary category for a given date range. */
