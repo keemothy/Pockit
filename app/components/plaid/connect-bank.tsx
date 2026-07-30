@@ -63,7 +63,9 @@ export default function ConnectBank() {
       }
       setAccounts(data.accounts);
       setLinkToken(null);
-      router.replace("/");
+      // The exchange route persists the accounts before this response returns.
+      // Navigate to Wallet so its server-side query reads the newly connected cards.
+      router.replace("/wallet");
       router.refresh();
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Unable to retrieve your accounts.");

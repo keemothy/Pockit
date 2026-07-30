@@ -1,12 +1,13 @@
 'use client';
 
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, ChevronDown, ChevronUp, Landmark, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { getRewardRulesForCard } from '@/lib/rewards/reward-rules';
 
 export type WalletCard = {
   id: string;
+  plaidItemId?: string;
   name: string;
   issuer: string;
   lastFour: string;
@@ -20,12 +21,41 @@ export type WalletCard = {
     rewardCurrency: string;
   }[];
   rewardsMatched: boolean;
+  catalogCardId?: string;
   hasSpendingData: boolean;
   categories: { label: string; amount: number; color: string }[];
   isManual?: boolean;
 };
 
+export type ConnectedPlaidBank = {
+  plaidItemId: string;
+  name: string;
+  accountCount: number;
+};
+
 type CatalogCard = { cardId: string; name: string; issuer: string; network: string; universalCashbackPercent: number };
+
+function displayIssuerName(issuer: string) {
+  const trimmedIssuer = issuer.trim();
+  if (trimmedIssuer !== trimmedIssuer.toUpperCase()) return trimmedIssuer;
+  return trimmedIssuer.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function displayCatalogCardName(card: CatalogCard) {
+  const issuer = displayIssuerName(card.issuer);
+  return card.name.toLowerCase().startsWith(issuer.toLowerCase()) ? card.name : `${issuer} ${card.name}`;
+}
+
+function cardCatalogMatchesName(card: CatalogCard, value: string) {
+  const query = value.trim().toLowerCase();
+  return Boolean(query) && [card.name, displayCatalogCardName(card)].some((name) => name.toLowerCase() === query);
+}
+
+function cardCatalogMatchesSearch(card: CatalogCard, value: string) {
+  const query = value.trim().toLowerCase();
+  return !query || [displayCatalogCardName(card), card.name, card.issuer]
+    .some((candidate) => candidate.toLowerCase().includes(query));
+}
 
 function catalogRewardDetails(card: CatalogCard | undefined) {
   if (!card) return [];
@@ -121,7 +151,7 @@ function Donut({ card }: { card: WalletCard }) {
   );
 
   const donutBackground = !card.hasSpendingData
-    ? '#e2e8f0'
+    ? '#2184c7'
     : `conic-gradient(${stops.parts.join(', ')})`;
 
   return (
@@ -133,40 +163,9 @@ function Donut({ card }: { card: WalletCard }) {
   );
 }
 
-function CardTilt({ children }: { children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [style, setStyle] = useState<React.CSSProperties>({});
-
-  return (
-    <div
-      ref={ref}
-      className="w-fit"
-      onMouseMove={(e) => {
-        const rect = ref.current?.getBoundingClientRect();
-        if (!rect) return;
-        const px = (e.clientX - rect.left) / rect.width - 0.5;
-        const py = (e.clientY - rect.top) / rect.height - 0.5;
-        setStyle({
-          transform: `perspective(600px) rotateX(${py * -12}deg) rotateY(${px * 12}deg) scale3d(1.04,1.04,1.04)`,
-          transition: 'transform 0.08s linear',
-        });
-      }}
-      onMouseLeave={() =>
-        setStyle({
-          transform: 'perspective(600px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)',
-          transition: 'transform 0.5s cubic-bezier(0.23,1,0.32,1)',
-        })
-      }
-      style={style}
-    >
-      {children}
-    </div>
-  );
-}
-
 type RewardEditorCard = Pick<WalletCard, 'id' | 'name' | 'rewardDetails'>;
 
-export default function WalletDashboard({ initialCards, cardholderName, spendingPeriodLabel }: { initialCards: WalletCard[]; cardholderName: string; spendingPeriodLabel: string }) {
+export default function WalletDashboard({ initialCards, cardholderName, spendingPeriodLabel, hasConnectedNonCreditAccounts, connectedBanks }: { initialCards: WalletCard[]; cardholderName: string; spendingPeriodLabel: string; hasConnectedNonCreditAccounts: boolean; connectedBanks: ConnectedPlaidBank[] }) {
   const router = useRouter();
   const [cards, setCards] = useState(initialCards);
   const [focusedCardId, setFocusedCardId] = useState(initialCards[0]?.id ?? '');
@@ -180,6 +179,10 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
   const [creditLimit, setCreditLimit] = useState('');
   const [newCategories, setNewCategories] = useState<WalletCard['categories']>([]);
   const [catalogCards, setCatalogCards] = useState<CatalogCard[]>([]);
+  const [cardMatcherCard, setCardMatcherCard] = useState<WalletCard | null>(null);
+  const [catalogSearch, setCatalogSearch] = useState('');
+  const [isSavingCardMatch, setIsSavingCardMatch] = useState(false);
+  const [cardMatchError, setCardMatchError] = useState('');
   const [isRefreshingSpending, setIsRefreshingSpending] = useState(false);
   const [rewardEditorCard, setRewardEditorCard] = useState<RewardEditorCard | null>(null);
   const [editableRewards, setEditableRewards] = useState<WalletCard['rewardDetails']>([]);
@@ -190,6 +193,8 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
   const [manualBalance, setManualBalance] = useState('');
   const [manualLimit, setManualLimit] = useState('');
   const [manualCategories, setManualCategories] = useState<WalletCard['categories']>([]);
+  const [disconnectingItemId, setDisconnectingItemId] = useState('');
+  const [disconnectError, setDisconnectError] = useState('');
 
   function focusCard(cardId: string) {
     setFocusedCardId(cardId);
@@ -200,17 +205,12 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
   }
 
   useEffect(() => {
-    if (!isModalOpen || catalogCards.length > 0) return;
+    if ((!isModalOpen && !cardMatcherCard) || catalogCards.length > 0) return;
     fetch('/api/cards/catalog')
       .then((response) => response.ok ? response.json() : { cards: [] })
       .then((payload: { cards?: CatalogCard[] }) => setCatalogCards(payload.cards ?? []))
       .catch(() => setCatalogCards([]));
-  }, [isModalOpen, catalogCards.length]);
-
-  useEffect(() => {
-    if (!isModalOpen) return;
-    document.querySelector<HTMLInputElement>('input[placeholder="e.g. Citi Double Cash"]')?.setAttribute('list', 'credit-card-catalog');
-  }, [isModalOpen]);
+  }, [isModalOpen, cardMatcherCard, catalogCards.length]);
 
   function addCard(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -219,9 +219,9 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
     const parsedLimit = Number.parseFloat(creditLimit);
     if (!name.trim() || normalizedLastFour.length !== 4 || Number.isNaN(parsedBalance) || Number.isNaN(parsedLimit) || parsedLimit <= 0) return;
 
-    const catalogMatch = catalogCards.find((catalogCard) => catalogCard.name.toLowerCase() === name.trim().toLowerCase());
+    const catalogMatch = catalogCards.find((catalogCard) => cardCatalogMatchesName(catalogCard, name));
     const card: WalletCard = {
-      id: crypto.randomUUID(), name: name.trim(), issuer: 'CREDIT CARD', lastFour: normalizedLastFour,
+      id: crypto.randomUUID(), name: catalogMatch ? displayCatalogCardName(catalogMatch) : name.trim(), issuer: 'CREDIT CARD', lastFour: normalizedLastFour,
       cardholderName, currentBalance: parsedBalance, limit: parsedLimit, color: 'blue',
       rewardDetails: catalogRewardDetails(catalogMatch), rewardsMatched: Boolean(catalogMatch),
       hasSpendingData: newCategories.some((category) => category.amount > 0),
@@ -243,10 +243,78 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
     }
   }
 
+  async function disconnectPlaidItem(bank: ConnectedPlaidBank) {
+    const confirmed = window.confirm(
+      `Disconnect ${bank.name}? This removes ${bank.accountCount} connected account${bank.accountCount === 1 ? '' : 's'} from Wallets.`,
+    );
+    if (!confirmed) return;
+
+    setDisconnectError('');
+    setDisconnectingItemId(bank.plaidItemId);
+    try {
+      const response = await fetch('/api/plaid/disconnect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plaidItemId: bank.plaidItemId }),
+      });
+      const payload = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? 'Unable to disconnect this bank.');
+
+      const disconnectedCardIds = new Set(cards.filter(
+        (connectedCard) => connectedCard.plaidItemId === bank.plaidItemId,
+      ).map((connectedCard) => connectedCard.id));
+      setCards((currentCards) => currentCards.filter(
+        (connectedCard) => connectedCard.plaidItemId !== bank.plaidItemId,
+      ));
+      setFocusedCardId((id) => disconnectedCardIds.has(id) ? '' : id);
+      setCurrentCardId((id) => disconnectedCardIds.has(id) ? '' : id);
+      router.refresh();
+    } catch (error) {
+      setDisconnectError(error instanceof Error ? error.message : 'Unable to disconnect this bank.');
+    } finally {
+      setDisconnectingItemId('');
+    }
+  }
+
   function openRewardEditor(card: WalletCard) {
     setRewardEditorCard(card);
     setEditableRewards(card.rewardDetails);
     setRewardSaveError('');
+  }
+
+  function openCardMatcher(card: WalletCard) {
+    setCardMatcherCard(card);
+    setCatalogSearch(card.name);
+    setCardMatchError('');
+  }
+
+  async function saveCardMatch(catalogCard: CatalogCard) {
+    if (!cardMatcherCard) return;
+    setIsSavingCardMatch(true);
+    setCardMatchError('');
+    try {
+      const response = await fetch('/api/cards/identity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardId: cardMatcherCard.id, catalogCardId: catalogCard.cardId }),
+      });
+      const payload = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? 'Unable to save the card match.');
+
+      setCards((currentCards) => currentCards.map((card) => card.id === cardMatcherCard.id ? {
+        ...card,
+        name: displayCatalogCardName(catalogCard),
+        catalogCardId: catalogCard.cardId,
+        rewardDetails: catalogRewardDetails(catalogCard),
+        rewardsMatched: true,
+      } : card));
+      setCardMatcherCard(null);
+      router.refresh();
+    } catch (error) {
+      setCardMatchError(error instanceof Error ? error.message : 'Unable to save the card match.');
+    } finally {
+      setIsSavingCardMatch(false);
+    }
   }
 
   function openManualEditor(card: WalletCard) {
@@ -347,8 +415,8 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
 
           {cards.length === 0 ? (
             <section className="mt-6 rounded-[28px] border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-              <h2 className="text-lg font-semibold">No accounts connected yet</h2>
-              <p className="mt-2 text-sm text-slate-600">Connect a bank or add a card to start tracking balances and spending.</p>
+              <h2 className="text-lg font-semibold">{hasConnectedNonCreditAccounts ? 'No credit cards connected yet' : 'No accounts connected yet'}</h2>
+              <p className="mt-2 text-sm text-slate-600">{hasConnectedNonCreditAccounts ? 'Your checking or savings account is connected. Wallets currently displays credit cards only.' : 'Connect a bank or add a card to start tracking balances and spending.'}</p>
               <a href="/auth/connect-bank" className="mt-5 inline-block rounded-xl bg-[#2865e9] px-4 py-2 text-sm font-medium text-white">Connect bank</a>
             </section>
           ) : (
@@ -378,7 +446,7 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
               return (
                 <article id={`wallet-card-${card.id}`} key={card.id} className={`relative scroll-mt-6 rounded-[24px] border-2 bg-white p-4 shadow-md transition ${isCurrentCard ? 'border-[#3b82f6] shadow-[0_0_0_4px_rgba(147,197,253,0.38)]' : focusedCardId === card.id ? 'border-[#a8ccff]' : 'border-slate-100'}`}>
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3"><h2 className="text-xl font-bold">{card.name}</h2>{(card.isManual || card.issuer === 'POCKIT CARD') && <button type="button" onClick={() => openManualEditor(card)} className="inline-flex items-center gap-1 text-xs font-medium text-[#2865e9] hover:underline"><Pencil size={13} aria-hidden="true" />Edit card</button>}</div>
+                    <div className="flex items-center gap-3"><h2 className="text-xl font-bold">{card.name}</h2>{(card.isManual || card.issuer === 'POCKIT CARD') ? <button type="button" onClick={() => openManualEditor(card)} className="inline-flex items-center gap-1 text-xs font-medium text-[#2865e9] hover:underline"><Pencil size={13} aria-hidden="true" />Edit card</button> : <button type="button" onClick={() => openCardMatcher(card)} className="inline-flex items-center gap-1 text-xs font-medium text-[#2865e9] hover:underline"><Pencil size={13} aria-hidden="true" />{card.catalogCardId ? 'Change card' : 'Match card'}</button>}</div>
                     <button type="button" onClick={() => { setCurrentCardId(card.id); setFocusedCardId(card.id); }} aria-pressed={isCurrentCard} className="shrink-0 text-center">
                       <span className={`flex h-5 w-16 overflow-hidden rounded-full ${isCurrentCard ? 'bg-[#a9c9ff]' : 'bg-[#eeeeee]'}`} aria-hidden="true">
                         <span className={`h-full w-8 rounded-full ${isCurrentCard ? 'ml-auto bg-[#2865e9]' : 'bg-[#cfcfcf]'}`} />
@@ -387,9 +455,9 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
                     </button>
                   </div>
                   <div className="mt-3 grid gap-4 xl:grid-cols-[260px_minmax(360px,0.8fr)_minmax(300px,0.55fr)] xl:items-start">
-                    <div><CardTilt><CreditCardVisual card={card} /></CardTilt><div className="mt-3 w-[240px]"><div className="h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2784c6]" style={{ width: `${usage}%` }} /></div><div className="mt-1.5 flex items-center justify-between gap-2 whitespace-nowrap text-[10px]"><span>Credit usage (cycle)</span><span>{money.format(card.currentBalance)} / {money.format(card.limit)}</span></div></div></div>
+                    <div><CreditCardVisual card={card} /><div className="mt-3 w-[240px]"><div className="h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2784c6]" style={{ width: `${usage}%` }} /></div><div className="mt-1.5 flex items-center justify-between gap-2 whitespace-nowrap text-[10px]"><span>Credit usage (cycle)</span><span>{money.format(card.currentBalance)} / {money.format(card.limit)}</span></div></div></div>
                     <div className="border-y border-slate-200 py-3 xl:border-x xl:border-y-0 xl:px-5">
-                      <div className="grid gap-3 sm:grid-cols-[104px_1fr] sm:items-start"><div className="flex flex-col items-center"><p className="mb-2 w-[104px] text-center text-[10px] font-semibold uppercase tracking-wide text-slate-400">{spendingPeriodLabel} usage</p><Donut card={card} /></div><div className="space-y-1.5">{card.hasSpendingData ? card.categories.map((category) => <div key={category.label} className="rounded-lg bg-slate-50 px-2 py-1.5 text-xs"><span className="mr-1.5 inline-block h-2 w-2 rounded-full" style={{ backgroundColor: category.color }} />{category.label} - {money.format(category.amount)}</div>) : <p className="text-xs text-slate-500">No categorized spending yet. Refresh a Transactions-enabled Sandbox account to populate this chart.</p>}</div></div>
+                      <div className="grid gap-3 sm:grid-cols-[104px_1fr] sm:items-start"><div className="flex flex-col items-center"><p className="mb-2 w-[104px] text-center text-[10px] font-semibold uppercase tracking-wide text-slate-400">{spendingPeriodLabel} usage</p><Donut card={card} /></div><div className="space-y-1.5">{card.hasSpendingData ? card.categories.map((category) => <div key={category.label} className="rounded-lg bg-slate-50 px-2 py-1.5 text-xs"><span className="mr-1.5 inline-block h-2 w-2 rounded-full" style={{ backgroundColor: category.color }} />{category.label} - {money.format(category.amount)}</div>) : <div className="rounded-lg bg-slate-50 px-2 py-1.5 text-xs"><span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-[#2184c7]" />Transactions total - {money.format(monthlySpendingTotal(card))}</div>}</div></div>
                     </div>
                     <div className="text-left xl:pl-5"><div className="flex items-center justify-between gap-2"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Reward rates</p><button type="button" onClick={() => openRewardEditor(card)} className="inline-flex items-center gap-1 text-[11px] font-medium text-[#2865e9] hover:underline"><Pencil size={12} aria-hidden="true" />Edit</button></div><div className="mt-3 space-y-2">{card.rewardDetails.length > 0 ? card.rewardDetails.slice(0, 4).map((detail) => <div key={`${detail.label}-${detail.multiplier}`} className="flex items-center justify-between rounded-lg bg-blue-50 px-2.5 py-2 text-xs"><span className="capitalize text-slate-700">{detail.label}</span><strong className="text-blue-700">{detail.multiplier}x</strong></div>) : <p className="rounded-lg bg-slate-50 p-2.5 text-xs text-slate-500">Choose reward rates for this card.</p>}</div><div className="mt-3 border-t border-slate-200 pt-3"><p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">This month&apos;s rewards</p>{rewardsThisMonth.length > 0 ? <><div className="mt-2 space-y-1.5">{rewardsThisMonth.map((reward) => <div key={reward.label} className="flex items-center justify-between gap-2 text-sm"><span className="truncate font-medium text-slate-700">{reward.label}</span><strong className="shrink-0 text-[#2865e9]">{reward.points.toLocaleString()} pts</strong></div>)}</div><div className="mt-2 flex justify-between border-t border-slate-100 pt-2 text-lg font-bold"><span>Total</span><span className="text-[#2865e9]">{totalRewardPoints.toLocaleString()} pts</span></div></> : <p className="mt-2 text-[11px] text-slate-500">{card.rewardDetails.length > 0 ? 'No eligible spending this month.' : 'Add a category rate to calculate points.'}</p>}</div></div>
                   </div>
@@ -399,13 +467,52 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
           </section>
       </main>
 
-      {isManageCardsOpen && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="manage-cards-title" className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"><div className="flex items-start justify-between"><div><p className="text-sm font-semibold text-[#2865e9]">Wallets</p><h2 id="manage-cards-title" className="mt-1 text-2xl font-bold">Manage cards</h2></div><button type="button" onClick={() => setIsManageCardsOpen(false)} className="text-2xl text-slate-500" aria-label="Close manage cards">×</button></div><div className="mt-5 space-y-2">{cards.map((card) => <div key={card.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3"><div className="min-w-0"><p className="truncate text-sm font-semibold">{card.name}</p><p className="text-xs text-slate-500">•••• {card.lastFour} · {card.isManual || card.issuer === 'POCKIT CARD' ? 'Manual card' : 'Connected account'}</p></div>{card.isManual || card.issuer === 'POCKIT CARD' ? <button type="button" onClick={() => { setCards((currentCards) => currentCards.filter((currentCard) => currentCard.id !== card.id)); setFocusedCardId((id) => id === card.id ? '' : id); setCurrentCardId((id) => id === card.id ? '' : id); }} className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">Delete</button> : <span className="shrink-0 text-[11px] text-slate-400">Connected</span>}</div>)}</div><p className="mt-4 text-xs text-slate-500">Deleting a manual card removes it from this Wallet view. Connected accounts must be managed through their bank connection.</p></div></div>}
+      {isManageCardsOpen && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="manage-cards-title" className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between">
+              <div><p className="text-sm font-semibold text-[#2865e9]">Wallets</p><h2 id="manage-cards-title" className="mt-1 text-2xl font-bold">Manage cards</h2></div>
+              <button type="button" onClick={() => setIsManageCardsOpen(false)} className="text-2xl text-slate-500" aria-label="Close manage cards">×</button>
+            </div>
+            <div className="mt-5 space-y-4">
+              {cards.filter((card) => card.isManual || card.issuer === 'POCKIT CARD').length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Manual cards</p>
+                  {cards.filter((card) => card.isManual || card.issuer === 'POCKIT CARD').map((card) => (
+                    <div key={card.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3">
+                      <div className="min-w-0"><p className="truncate text-sm font-semibold">{card.name}</p><p className="text-xs text-slate-500">•••• {card.lastFour} · Manual card</p></div>
+                      <button type="button" onClick={() => { setCards((currentCards) => currentCards.filter((currentCard) => currentCard.id !== card.id)); setFocusedCardId((id) => id === card.id ? '' : id); setCurrentCardId((id) => id === card.id ? '' : id); }} className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">Delete</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {connectedBanks.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Connected banks</p>
+                  {connectedBanks.map((bank) => (
+                    <div key={bank.plaidItemId} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3">
+                      <div className="min-w-0"><p className="truncate text-sm font-semibold">{bank.name}</p><p className="text-xs text-slate-500">{bank.accountCount} connected account{bank.accountCount === 1 ? '' : 's'}</p></div>
+                      <button type="button" onClick={() => void disconnectPlaidItem(bank)} disabled={disconnectingItemId === bank.plaidItemId} className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60">
+                        {disconnectingItemId === bank.plaidItemId ? 'Disconnecting…' : 'Disconnect'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {disconnectError && <p role="alert" className="mt-3 text-sm text-red-600">{disconnectError}</p>}
+            <p className="mt-4 text-xs text-slate-500">Disconnecting a bank revokes its Plaid connection and removes every connected account from Wallets. Manual cards can be deleted individually.</p>
+          </div>
+        </div>
+      )}
+
+      {cardMatcherCard && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="card-matcher-title" className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"><div className="flex justify-between gap-4"><div><p className="text-sm font-semibold text-[#2865e9]">Connected card</p><h2 id="card-matcher-title" className="mt-1 text-2xl font-bold">Match your card</h2><p className="mt-1 text-sm text-slate-500">Plaid returned a generic account name. Choose the exact card to apply its reward rates.</p></div><button type="button" onClick={() => setCardMatcherCard(null)} className="text-2xl text-slate-500" aria-label="Close card matcher">×</button></div><label className="mt-5 block text-sm font-medium">Search card<input autoFocus value={catalogSearch} onChange={(event) => setCatalogSearch(event.target.value)} placeholder="e.g. Chase Sapphire Preferred" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><div className="mt-3 max-h-72 space-y-2 overflow-y-auto">{catalogCards.filter((catalogCard) => cardCatalogMatchesSearch(catalogCard, catalogSearch)).map((catalogCard) => <button key={catalogCard.cardId} type="button" disabled={isSavingCardMatch} onClick={() => void saveCardMatch(catalogCard)} className="w-full rounded-xl border border-slate-200 p-3 text-left transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-wait"><span className="block text-sm font-semibold">{displayCatalogCardName(catalogCard)}</span><span className="mt-0.5 block text-xs text-slate-500">{displayIssuerName(catalogCard.issuer)} · {catalogCard.network}</span></button>)}{catalogCards.length > 0 && catalogCards.filter((catalogCard) => cardCatalogMatchesSearch(catalogCard, catalogSearch)).length === 0 && <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-500">No matching card found. Try a shorter name.</p>}{catalogCards.length === 0 && <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-500">Loading the card catalog…</p>}</div>{cardMatchError && <p role="alert" className="mt-3 text-sm text-red-600">{cardMatchError}</p>}<button type="button" onClick={() => setCardMatcherCard(null)} className="mt-5 w-full rounded-lg border border-slate-300 py-2.5 font-medium">Cancel</button></div></div>}
 
       <datalist id="credit-card-catalog">
-        {catalogCards.map((card) => <option key={card.cardId} value={card.name} label={`${card.issuer} · ${card.network}`} />)}
+        {catalogCards.map((card) => <option key={card.cardId} value={displayCatalogCardName(card)} label={`${displayIssuerName(card.issuer)} · ${card.network}`} />)}
       </datalist>
 
-      {isModalOpen && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="add-card-title" className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"><div className="flex justify-between"><div><p className="text-sm font-semibold text-[#2865e9]">Wallets</p><h2 id="add-card-title" className="mt-1 text-2xl font-bold">Add credit card</h2></div><button type="button" onClick={() => setIsModalOpen(false)} className="text-2xl text-slate-500">×</button></div><form className="mt-6 space-y-4" onSubmit={addCard}><label className="block text-sm font-medium">Card name<input required value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Citi Double Cash" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><div className="grid grid-cols-2 gap-3"><label className="block text-sm font-medium">Last 4 digits<input required inputMode="numeric" maxLength={4} value={lastFour} onChange={(event) => setLastFour(event.target.value.replace(/\D/g, ''))} placeholder="1234" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><label className="block text-sm font-medium">Credit usage (cycle)<input required type="number" min="0" step="0.01" value={balance} onChange={(event) => setBalance(event.target.value)} placeholder="0.00" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label></div><label className="block text-sm font-medium">Credit limit<input required type="number" min="1" step="0.01" value={creditLimit} onChange={(event) => setCreditLimit(event.target.value)} placeholder="e.g. 5000" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><div className="border-t border-slate-200 pt-4"><div className="flex items-baseline justify-between"><p className="text-sm font-semibold">Monthly spending details</p><span className="text-xs text-slate-500">Optional</span></div><p className="mt-1 text-xs text-slate-500">These entries populate the Donut.</p><div className="mt-3 space-y-2">{newCategories.map((category, index) => <div key={index} className="grid grid-cols-[1fr_100px_32px] gap-2"><select value={spendingCategoryOptions.includes(category.label) ? category.label : 'Other'} onChange={(event) => updateNewCategory(index, 'label', event.target.value)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"><option value="Other">Other</option>{spendingCategoryOptions.filter((option) => option !== 'Other').map((option) => <option key={option} value={option}>{option}</option>)}</select><input type="number" min="0" step="0.01" value={category.amount || ''} onChange={(event) => updateNewCategory(index, 'amount', event.target.value)} placeholder="Amount" className="rounded-lg border border-slate-300 px-3 py-2 text-sm" /><button type="button" onClick={() => setNewCategories((categories) => categories.filter((_, categoryIndex) => categoryIndex !== index))} className="grid place-items-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500" aria-label="Remove spending category"><Trash2 size={16} aria-hidden="true" /></button></div>)}</div><button type="button" onClick={() => setNewCategories((categories) => [...categories, { label: 'Dining', amount: 0, color: manualCategoryColors[categories.length % manualCategoryColors.length] }])} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#2865e9]"><Plus size={15} aria-hidden="true" />Add spending category</button></div><div className="flex gap-3 pt-2"><button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 rounded-lg border border-slate-300 py-2.5 font-medium">Cancel</button><button type="submit" className="flex-1 rounded-lg bg-[#2865e9] py-2.5 font-medium text-white">Add card</button></div></form></div></div>}
+      {isModalOpen && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="add-card-title" className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"><div className="flex justify-between"><div><p className="text-sm font-semibold text-[#2865e9]">Wallets</p><h2 id="add-card-title" className="mt-1 text-2xl font-bold">Add credit card</h2></div><button type="button" onClick={() => setIsModalOpen(false)} className="text-2xl text-slate-500">×</button></div><form className="mt-6 space-y-4" onSubmit={addCard}><label className="block text-sm font-medium">Card name<input required list="credit-card-catalog" value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Citi Double Cash" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><div className="grid grid-cols-2 gap-3"><label className="block text-sm font-medium">Last 4 digits<input required inputMode="numeric" maxLength={4} value={lastFour} onChange={(event) => setLastFour(event.target.value.replace(/\D/g, ''))} placeholder="1234" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><label className="block text-sm font-medium">Credit usage (cycle)<input required type="number" min="0" step="0.01" value={balance} onChange={(event) => setBalance(event.target.value)} placeholder="0.00" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label></div><label className="block text-sm font-medium">Credit limit<input required type="number" min="1" step="0.01" value={creditLimit} onChange={(event) => setCreditLimit(event.target.value)} placeholder="e.g. 5000" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><div className="border-t border-slate-200 pt-4"><div className="flex items-baseline justify-between"><p className="text-sm font-semibold">Monthly spending details</p><span className="text-xs text-slate-500">Optional</span></div><p className="mt-1 text-xs text-slate-500">These entries populate the Donut.</p><div className="mt-3 space-y-2">{newCategories.map((category, index) => <div key={index} className="grid grid-cols-[1fr_100px_32px] gap-2"><select value={spendingCategoryOptions.includes(category.label) ? category.label : 'Other'} onChange={(event) => updateNewCategory(index, 'label', event.target.value)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"><option value="Other">Other</option>{spendingCategoryOptions.filter((option) => option !== 'Other').map((option) => <option key={option} value={option}>{option}</option>)}</select><input type="number" min="0" step="0.01" value={category.amount || ''} onChange={(event) => updateNewCategory(index, 'amount', event.target.value)} placeholder="Amount" className="rounded-lg border border-slate-300 px-3 py-2 text-sm" /><button type="button" onClick={() => setNewCategories((categories) => categories.filter((_, categoryIndex) => categoryIndex !== index))} className="grid place-items-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500" aria-label="Remove spending category"><Trash2 size={16} aria-hidden="true" /></button></div>)}</div><button type="button" onClick={() => setNewCategories((categories) => [...categories, { label: 'Dining', amount: 0, color: manualCategoryColors[categories.length % manualCategoryColors.length] }])} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#2865e9]"><Plus size={15} aria-hidden="true" />Add spending category</button></div><div className="flex gap-3 pt-2"><button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 rounded-lg border border-slate-300 py-2.5 font-medium">Cancel</button><button type="submit" className="flex-1 rounded-lg bg-[#2865e9] py-2.5 font-medium text-white">Add card</button></div></form></div></div>}
       {manualEditorCard && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="manual-card-editor-title" className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"><div className="flex justify-between"><div><p className="text-sm font-semibold text-[#2865e9]">Manual credit card</p><h2 id="manual-card-editor-title" className="mt-1 text-2xl font-bold">Edit card & spending</h2></div><button type="button" onClick={() => setManualEditorCard(null)} className="text-2xl text-slate-500" aria-label="Close card editor">×</button></div><div className="mt-5 space-y-4"><label className="block text-sm font-medium">Card name<input value={manualName} onChange={(event) => setManualName(event.target.value)} className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><div className="grid grid-cols-2 gap-3"><label className="block text-sm font-medium">Credit usage (cycle)<input type="number" min="0" step="0.01" value={manualBalance} onChange={(event) => setManualBalance(event.target.value)} className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><label className="block text-sm font-medium">Credit limit<input type="number" min="1" step="0.01" value={manualLimit} onChange={(event) => setManualLimit(event.target.value)} className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label></div><div className="border-t border-slate-200 pt-4"><p className="text-sm font-semibold">Monthly spending categories</p><p className="mt-1 text-xs text-slate-500">These amounts drive the Donut. They may differ from the billing-cycle balance.</p><div className="mt-3 space-y-2">{manualCategories.map((category, index) => <div key={index} className="grid grid-cols-[1fr_100px_32px] gap-2"><select value={spendingCategoryOptions.includes(category.label) ? category.label : 'Other'} onChange={(event) => updateManualCategory(index, 'label', event.target.value)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"><option value="Other">Other</option>{spendingCategoryOptions.filter((option) => option !== 'Other').map((option) => <option key={option} value={option}>{option}</option>)}</select><input type="number" min="0" step="0.01" value={category.amount || ''} onChange={(event) => updateManualCategory(index, 'amount', event.target.value)} placeholder="Amount" className="rounded-lg border border-slate-300 px-3 py-2 text-sm" /><button type="button" onClick={() => setManualCategories((categories) => categories.filter((_, categoryIndex) => categoryIndex !== index))} className="grid place-items-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500" aria-label="Remove spending category"><Trash2 size={16} aria-hidden="true" /></button></div>)}</div><button type="button" onClick={() => setManualCategories((categories) => [...categories, { label: 'Dining', amount: 0, color: manualCategoryColors[categories.length % manualCategoryColors.length] }])} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#2865e9]"><Plus size={15} aria-hidden="true" />Add spending category</button></div><div className="flex gap-3 pt-2"><button type="button" onClick={() => setManualEditorCard(null)} className="flex-1 rounded-lg border border-slate-300 py-2.5 font-medium">Cancel</button><button type="button" onClick={saveManualCard} className="flex-1 rounded-lg bg-[#2865e9] py-2.5 font-medium text-white">Save changes</button></div></div></div></div>}
       {rewardEditorCard && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="reward-editor-title" className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"><div className="flex justify-between gap-4"><div><p className="text-sm font-semibold text-[#2865e9]">{rewardEditorCard.name}</p><h2 id="reward-editor-title" className="mt-1 text-2xl font-bold">Reward bonuses</h2><p className="mt-1 text-xs text-slate-500">Choose each eligible category and reward rate.</p></div><button type="button" onClick={() => setRewardEditorCard(null)} className="text-2xl text-slate-500" aria-label="Close reward editor">×</button></div><div className="mt-5 space-y-2">{editableRewards.map((reward, index) => <div key={index} className="grid grid-cols-[1fr_92px_32px] gap-2"><select value={rewardCategoryOptions.includes(reward.label) ? reward.label : 'Other'} onChange={(event) => updateReward(index, 'label', event.target.value)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500" aria-label="Reward category">{rewardCategoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}</select><select value={rewardMultiplierOptions.includes(reward.multiplier) ? reward.multiplier : 1} onChange={(event) => updateReward(index, 'multiplier', event.target.value)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500" aria-label="Reward multiplier">{rewardMultiplierOptions.map((multiplier) => <option key={multiplier} value={multiplier}>{multiplier}x</option>)}</select><button type="button" onClick={() => setEditableRewards((rewards) => rewards.filter((_, rewardIndex) => rewardIndex !== index))} className="grid place-items-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500" aria-label="Remove reward"><Trash2 size={16} aria-hidden="true" /></button></div>)}</div><button type="button" onClick={() => setEditableRewards((rewards) => [...rewards, { label: 'Dining', multiplier: 1, rewardCurrency: 'POINTS' }])} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#2865e9]"><Plus size={15} aria-hidden="true" />Add reward rate</button>{rewardSaveError && <p className="mt-3 text-sm text-red-600">{rewardSaveError}</p>}<div className="mt-6 flex gap-3"><button type="button" onClick={() => setRewardEditorCard(null)} className="flex-1 rounded-lg border border-slate-300 py-2.5 font-medium">Cancel</button><button type="button" disabled={isSavingRewards} onClick={saveRewards} className="flex-1 rounded-lg bg-[#2865e9] py-2.5 font-medium text-white disabled:opacity-60">{isSavingRewards ? 'Saving…' : 'Save rewards'}</button></div></div></div>}
     </div>

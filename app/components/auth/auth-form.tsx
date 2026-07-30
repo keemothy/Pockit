@@ -6,12 +6,181 @@ import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
-const stats = [
+/* ── Realistic card data ────────────────────────────────── */
+const CARDS = [
+  {
+    gradient: "linear-gradient(145deg, #0B1F4A 0%, #1B3568 52%, #0B1F4A 100%)",
+    sheen: "linear-gradient(125deg, transparent 30%, rgba(255,255,255,0.07) 50%, transparent 70%)",
+    name: "SAPPHIRE RESERVE",
+    number: "•••• •••• •••• 4847",
+    holder: "JAMES CHEN",
+    expiry: "09/28",
+    network: "visa" as const,
+    chipLight: true,
+    pos: { top: "-6%", left: "-14%", transform: "rotate(-19deg)" },
+    opacity: 0.42,
+  },
+  {
+    gradient: "linear-gradient(145deg, #8B8B8B 0%, #D8D8D8 38%, #ACACAC 68%, #C6C6C6 100%)",
+    sheen: "linear-gradient(130deg, transparent 20%, rgba(255,255,255,0.22) 48%, transparent 68%)",
+    name: "THE PLATINUM CARD",
+    number: "•••• •••••• •1004",
+    holder: "SARAH PARK",
+    expiry: "03/27",
+    network: "amex" as const,
+    chipLight: true,
+    pos: { top: "9%", left: "22%", transform: "rotate(-5deg)" },
+    opacity: 0.38,
+  },
+  {
+    gradient: "linear-gradient(145deg, #7B5519 0%, #C9A227 44%, #A07820 74%, #D4AF37 100%)",
+    sheen: "linear-gradient(130deg, transparent 25%, rgba(255,255,255,0.15) 50%, transparent 72%)",
+    name: "GOLD CARD",
+    number: "•••• •••••• •8832",
+    holder: "MIKE WILSON",
+    expiry: "11/26",
+    network: "amex" as const,
+    chipLight: false,
+    pos: { top: "42%", right: "-10%", transform: "rotate(13deg)" },
+    opacity: 0.40,
+  },
+  {
+    gradient: "linear-gradient(145deg, #141428 0%, #1E2040 52%, #0F1230 100%)",
+    sheen: "linear-gradient(125deg, transparent 30%, rgba(255,255,255,0.06) 50%, transparent 70%)",
+    name: "VENTURE X",
+    number: "•••• •••• •••• 7739",
+    holder: "EMMA DAVIS",
+    expiry: "07/29",
+    network: "mc" as const,
+    chipLight: true,
+    pos: { bottom: "20%", left: "-10%", transform: "rotate(-11deg)" },
+    opacity: 0.44,
+  },
+  {
+    gradient: "linear-gradient(145deg, #E4E4E4 0%, #F5F5F7 48%, #DCDCDC 100%)",
+    sheen: "linear-gradient(130deg, transparent 20%, rgba(255,255,255,0.5) 50%, transparent 75%)",
+    name: "TITANIUM",
+    number: "•••• •••• •••• 2291",
+    holder: "ALEX KIM",
+    expiry: "05/28",
+    network: "mc" as const,
+    chipLight: false,
+    pos: { bottom: "3%", left: "26%", transform: "rotate(6deg)" },
+    opacity: 0.36,
+  },
+  {
+    gradient: "linear-gradient(145deg, #004875 0%, #006DAA 52%, #004875 100%)",
+    sheen: "linear-gradient(125deg, transparent 28%, rgba(255,255,255,0.08) 50%, transparent 72%)",
+    name: "DOUBLE CASH",
+    number: "•••• •••• •••• 3456",
+    holder: "RYAN LEE",
+    expiry: "12/27",
+    network: "mc" as const,
+    chipLight: true,
+    pos: { top: "28%", right: "-6%", transform: "rotate(-14deg)" },
+    opacity: 0.40,
+  },
+];
+
+type Network = "visa" | "mc" | "amex";
+
+function NetworkBadge({ network, dark }: { network: Network; dark: boolean }) {
+  if (network === "visa") {
+    return (
+      <span className={`font-serif italic font-black text-lg tracking-tight ${dark ? "text-[#1A1F71]" : "text-white/80"}`}>
+        VISA
+      </span>
+    );
+  }
+  if (network === "amex") {
+    return (
+      <span className={`font-bold text-xs tracking-[0.3em] ${dark ? "text-gray-600/80" : "text-white/70"}`}>
+        AMEX
+      </span>
+    );
+  }
+  return (
+    <div className="flex items-center">
+      <div className="h-7 w-7 rounded-full bg-[#EB001B] opacity-90" />
+      <div className="h-7 w-7 rounded-full bg-[#F79E1B] opacity-90 -ml-3.5" />
+    </div>
+  );
+}
+
+function CreditCard({ card, index }: { card: typeof CARDS[number]; index: number }) {
+  const isDark = card.gradient.includes("E4E4") || card.gradient.includes("D8D8") || card.gradient.includes("8B8B");
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30, rotate: 0 }}
+      animate={{ opacity: card.opacity, y: 0 }}
+      transition={{ delay: 0.1 + index * 0.08, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+      className="absolute w-[252px] h-[158px] rounded-[14px] overflow-hidden select-none"
+      style={{
+        background: card.gradient,
+        boxShadow: "0 24px 56px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12)",
+        filter: "blur(0.6px) saturate(0.7)",
+        ...card.pos,
+      }}
+    >
+      {/* Sheen overlay */}
+      <div className="absolute inset-0" style={{ background: card.sheen }} />
+
+      <div className={`relative h-full flex flex-col justify-between p-4 ${isDark ? "text-zinc-800" : "text-white"}`}>
+        {/* Top row */}
+        <div className="flex items-start justify-between">
+          <span className={`text-[10px] font-semibold tracking-widest ${isDark ? "text-zinc-500" : "text-white/50"}`}>
+            {card.name}
+          </span>
+          <NetworkBadge network={card.network} dark={isDark} />
+        </div>
+
+        {/* Chip */}
+        <div className="flex items-center gap-2.5">
+          <div
+            className="relative h-7 w-9 rounded overflow-hidden"
+            style={{
+              background: card.chipLight
+                ? "linear-gradient(135deg, #c8a200, #f0d060, #a88000, #e8c840)"
+                : "linear-gradient(135deg, #a0a0a0, #d8d8d8, #888888, #c0c0c0)",
+            }}
+          >
+            <div
+              className="absolute inset-0 opacity-30"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.2) 3px,rgba(0,0,0,0.2) 4px),repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(0,0,0,0.2) 3px,rgba(0,0,0,0.2) 4px)",
+              }}
+            />
+          </div>
+          {/* Contactless */}
+          <span className={`text-base leading-none ${isDark ? "text-zinc-400" : "text-white/40"}`}>
+            )))
+          </span>
+        </div>
+
+        {/* Bottom */}
+        <div>
+          <p className={`font-mono text-[11px] tracking-[0.15em] ${isDark ? "text-zinc-600" : "text-white/70"}`}>
+            {card.number}
+          </p>
+          <div className={`mt-1 flex items-end justify-between text-[9px] ${isDark ? "text-zinc-500" : "text-white/45"}`}>
+            <span className="font-semibold tracking-wider">{card.holder}</span>
+            <span>{card.expiry}</span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ── Stats ─────────────────────────────────────────────── */
+const STATS = [
   { value: "48", label: "credit cards" },
   { value: "26", label: "subscriptions" },
   { value: "AI", label: "powered" },
 ];
 
+/* ── Main component ─────────────────────────────────────── */
 export default function AuthForm() {
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
@@ -57,71 +226,89 @@ export default function AuthForm() {
     router.refresh();
   }
 
-  /* Shared input class — intentionally calm, no colored rings */
   const inputCls =
-    "w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-colors duration-200 focus:border-white/25 focus:bg-white/[0.09]";
+    "w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-colors duration-200 focus:border-white/22 focus:bg-white/[0.09]";
 
   return (
     <div className="flex min-h-screen bg-[#020617]">
 
-      {/* ── Left brand panel ── */}
-      <div className="noise-bg relative hidden overflow-hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-center lg:px-14 lg:py-16">
-        {/* Aurora blobs — vivid, saturated */}
-        <div className="pointer-events-none absolute left-[-25%] top-[-20%] h-[640px] w-[640px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(31,120,255,0.5) 0%, transparent 68%)", animation: "aurora-1 16s ease-in-out infinite" }} />
-        <div className="pointer-events-none absolute bottom-[-25%] right-[-15%] h-[580px] w-[580px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(168,85,247,0.4) 0%, transparent 68%)", animation: "aurora-2 20s ease-in-out infinite" }} />
-        <div className="pointer-events-none absolute right-[5%] top-[30%] h-[420px] w-[420px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(236,72,153,0.3) 0%, transparent 68%)", animation: "aurora-3 13s ease-in-out infinite" }} />
-        <div className="pointer-events-none absolute bottom-[10%] left-[25%] h-[360px] w-[360px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(34,211,238,0.28) 0%, transparent 68%)", animation: "aurora-4 24s ease-in-out infinite" }} />
+      {/* ── Left panel — card scatter background ── */}
+      <div className="noise-bg relative hidden overflow-hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-between lg:px-12 lg:py-14">
 
+        {/* Deep dark base */}
+        <div className="absolute inset-0 bg-[#060d1f]" />
+
+        {/* Scattered credit cards */}
+        {CARDS.map((card, i) => (
+          <CreditCard key={i} card={card} index={i} />
+        ))}
+
+        {/* Color bloom overlays — give the cards atmosphere */}
+        <div className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at 30% 60%, rgba(31,120,255,0.18) 0%, transparent 55%)" }} />
+        <div className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at 70% 20%, rgba(168,85,247,0.14) 0%, transparent 50%)" }} />
+        <div className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at 50% 90%, rgba(236,72,153,0.10) 0%, transparent 50%)" }} />
+
+        {/* Strong dark vignette — cards recede, text comes forward */}
+        <div className="pointer-events-none absolute inset-0"
+          style={{ background: "linear-gradient(to bottom, rgba(4,9,22,0.92) 0%, rgba(4,9,22,0.30) 28%, rgba(4,9,22,0.30) 62%, rgba(4,9,22,0.94) 100%)" }} />
+
+        {/* 1 — Logo (top) */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-10 flex items-center gap-3"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl font-black text-white text-sm"
+            style={{ background: "linear-gradient(135deg, #1F78FF, #a855f7)" }}>
+            P
+          </div>
+          <span className="text-lg font-semibold text-white/80 tracking-tight">Pockit</span>
+        </motion.div>
+
+        {/* 2 — Headline + tagline (middle) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="relative z-10 max-w-md"
+          transition={{ delay: 0.45, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-10"
         >
-          {/* Logo */}
-          <div className="flex items-center gap-3 mb-14">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl font-black text-white text-sm"
-              style={{ background: "linear-gradient(135deg, #1F78FF, #a855f7)" }}>
-              P
-            </div>
-            <span className="text-lg font-semibold text-white/80 tracking-tight">Pockit</span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-5xl font-extrabold leading-[1.08] tracking-tight">
+          <h1 className="text-[50px] font-extrabold leading-[1.07] tracking-tight">
             <span className="animated-gradient-text">Smart money</span>
             <br />
             <span className="text-white">for smart</span>
             <br />
             <span className="text-white">spenders.</span>
           </h1>
-
-          <p className="mt-5 text-base text-white/40 leading-relaxed max-w-xs">
-            Pick the right card, maximize rewards, and manage every subscription — all in one place.
+          <p className="mt-4 text-sm text-white/40 leading-relaxed max-w-[280px]">
+            Pick the right card, maximize rewards, and manage every subscription.
           </p>
+        </motion.div>
 
-          {/* Stats row */}
-          <div className="mt-12 flex items-center gap-8">
-            {stats.map((s) => (
-              <div key={s.label}>
-                <p className="text-2xl font-extrabold text-white">{s.value}</p>
-                <p className="text-xs text-white/35 mt-0.5">{s.label}</p>
-              </div>
-            ))}
-          </div>
+        {/* 3 — Stats (bottom) */}
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-10 flex items-center gap-8"
+        >
+          {STATS.map((s) => (
+            <div key={s.label}>
+              <p className="text-[26px] font-extrabold text-white leading-none">{s.value}</p>
+              <p className="text-[11px] text-white/30 mt-1">{s.label}</p>
+            </div>
+          ))}
         </motion.div>
       </div>
 
       {/* ── Right form panel ── */}
       <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-[#030d1f] px-6 py-12">
-        {/* Subtle ambient glows */}
-        <div className="pointer-events-none absolute right-[-15%] top-[-10%] h-[420px] w-[420px] rounded-full opacity-25"
-          style={{ background: "radial-gradient(circle, rgba(168,85,247,0.35) 0%, transparent 70%)" }} />
-        <div className="pointer-events-none absolute bottom-[-15%] left-[-5%] h-[320px] w-[320px] rounded-full opacity-20"
+        <div className="pointer-events-none absolute right-[-15%] top-[-10%] h-[400px] w-[400px] rounded-full opacity-20"
+          style={{ background: "radial-gradient(circle, rgba(168,85,247,0.4) 0%, transparent 70%)" }} />
+        <div className="pointer-events-none absolute bottom-[-15%] left-[-5%] h-[320px] w-[320px] rounded-full opacity-18"
           style={{ background: "radial-gradient(circle, rgba(31,120,255,0.4) 0%, transparent 70%)" }} />
 
         <motion.div
@@ -141,7 +328,7 @@ export default function AuthForm() {
           <div className="gradient-border-card">
             <div className="rounded-[27px] px-7 py-8"
               style={{
-                background: "rgba(8,15,35,0.9)",
+                background: "rgba(8,15,35,0.92)",
                 backdropFilter: "blur(40px)",
                 WebkitBackdropFilter: "blur(40px)",
               }}

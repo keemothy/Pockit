@@ -42,3 +42,37 @@ on public.financial_accounts for select to authenticated
 using ((select auth.uid()) = user_id);
 
 grant select on public.financial_accounts to authenticated;
+
+-- Create a private `avatars` bucket in the Supabase dashboard before applying
+-- these policies. Users can only read and manage files inside their own folder.
+create policy "Users can view their own avatars"
+on storage.objects for select to authenticated
+using (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+);
+
+create policy "Users can upload their own avatars"
+on storage.objects for insert to authenticated
+with check (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+);
+
+create policy "Users can update their own avatars"
+on storage.objects for update to authenticated
+using (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+)
+with check (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+);
+
+create policy "Users can delete their own avatars"
+on storage.objects for delete to authenticated
+using (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+);

@@ -6,7 +6,6 @@ export const runtime = 'nodejs';
 export async function GET() {
   try {
     const cards = await getCardCatalog();
-
     return NextResponse.json({
       cards,
       source: CARD_CATALOG_SOURCE,
