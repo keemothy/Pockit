@@ -338,6 +338,7 @@ function Toggle({
       <button
         type="button"
         role="switch"
+        aria-checked={enabled}
         onClick={() => onChange(!enabled)}
         className={`relative h-7 w-12 shrink-0 cursor-pointer rounded-full transition-colors ${
           enabled ? "bg-blue-600" : "bg-slate-300"
