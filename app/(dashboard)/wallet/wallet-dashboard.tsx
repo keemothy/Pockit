@@ -1,8 +1,9 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, ChevronDown, ChevronUp, Landmark, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { getRewardRulesForCard } from '@/lib/rewards/reward-rules';
 
 export type WalletCard = {
   id: string;
@@ -23,6 +24,15 @@ export type WalletCard = {
   categories: { label: string; amount: number; color: string }[];
   isManual?: boolean;
 };
+
+type CatalogCard = { cardId: string; name: string; issuer: string; network: string; universalCashbackPercent: number };
+
+function catalogRewardDetails(card: CatalogCard | undefined) {
+  if (!card) return [];
+  const rules = getRewardRulesForCard(card.cardId);
+  if (rules.length > 0) return rules.map((rule) => ({ label: rule.category.replace(/-/g, ' '), multiplier: rule.multiplier, rewardCurrency: rule.rewardCurrency }));
+  return card.universalCashbackPercent ? [{ label: 'base cashback', multiplier: card.universalCashbackPercent, rewardCurrency: 'CASH_BACK' }] : [];
+}
 
 const cardBackground: Record<WalletCard['color'], string> = {
   blue: 'linear-gradient(140deg, #030c31 0%, #05255c 38%, #0a9ee6 76%, #03194d 100%)',
@@ -131,12 +141,14 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
   const [focusedCardId, setFocusedCardId] = useState(initialCards[0]?.id ?? '');
   const [currentCardId, setCurrentCardId] = useState(initialCards[0]?.id ?? '');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isManageCardsOpen, setIsManageCardsOpen] = useState(false);
   const [areCardPreviewsVisible, setAreCardPreviewsVisible] = useState(true);
   const [name, setName] = useState('');
   const [lastFour, setLastFour] = useState('');
   const [balance, setBalance] = useState('');
   const [creditLimit, setCreditLimit] = useState('');
   const [newCategories, setNewCategories] = useState<WalletCard['categories']>([]);
+  const [catalogCards, setCatalogCards] = useState<CatalogCard[]>([]);
   const [isRefreshingSpending, setIsRefreshingSpending] = useState(false);
   const [rewardEditorCard, setRewardEditorCard] = useState<RewardEditorCard | null>(null);
   const [editableRewards, setEditableRewards] = useState<WalletCard['rewardDetails']>([]);
@@ -156,6 +168,19 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
     });
   }
 
+  useEffect(() => {
+    if (!isModalOpen || catalogCards.length > 0) return;
+    fetch('/api/cards/catalog')
+      .then((response) => response.ok ? response.json() : { cards: [] })
+      .then((payload: { cards?: CatalogCard[] }) => setCatalogCards(payload.cards ?? []))
+      .catch(() => setCatalogCards([]));
+  }, [isModalOpen, catalogCards.length]);
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+    document.querySelector<HTMLInputElement>('input[placeholder="e.g. Citi Double Cash"]')?.setAttribute('list', 'credit-card-catalog');
+  }, [isModalOpen]);
+
   function addCard(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const normalizedLastFour = lastFour.replace(/\D/g, '').slice(-4);
@@ -163,10 +188,11 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
     const parsedLimit = Number.parseFloat(creditLimit);
     if (!name.trim() || normalizedLastFour.length !== 4 || Number.isNaN(parsedBalance) || Number.isNaN(parsedLimit) || parsedLimit <= 0) return;
 
+    const catalogMatch = catalogCards.find((catalogCard) => catalogCard.name.toLowerCase() === name.trim().toLowerCase());
     const card: WalletCard = {
       id: crypto.randomUUID(), name: name.trim(), issuer: 'CREDIT CARD', lastFour: normalizedLastFour,
       cardholderName, currentBalance: parsedBalance, limit: parsedLimit, color: 'blue',
-      rewardDetails: [], rewardsMatched: false,
+      rewardDetails: catalogRewardDetails(catalogMatch), rewardsMatched: Boolean(catalogMatch),
       hasSpendingData: newCategories.some((category) => category.amount > 0),
       categories: newCategories.filter((category) => category.amount > 0).map((category, index) => ({ ...category, color: manualCategoryColors[index % manualCategoryColors.length] })),
       isManual: true,
@@ -283,6 +309,7 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
             <button type="button" onClick={refreshSpending} disabled={isRefreshingSpending} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400"><RefreshCw size={16} className={isRefreshingSpending ? 'animate-spin' : ''} aria-hidden="true" />{isRefreshingSpending ? 'Refreshing…' : 'Refresh spending'}</button>
             <div className="flex flex-wrap items-center justify-end gap-2">
               <a href="/auth/connect-bank" className="inline-flex items-center gap-2 rounded-xl bg-[#121926] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"><Landmark size={16} aria-hidden="true" />Connect bank</a>
+              <button type="button" onClick={() => setIsManageCardsOpen(true)} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50">Manage cards</button>
               <button type="button" onClick={() => setIsModalOpen(true)} className="rounded-xl bg-[#2865e9] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700">＋ &nbsp; Add credit card</button>
             </div>
           </div>
@@ -340,6 +367,12 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
             })}
           </section>
       </main>
+
+      {isManageCardsOpen && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="manage-cards-title" className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"><div className="flex items-start justify-between"><div><p className="text-sm font-semibold text-[#2865e9]">Wallets</p><h2 id="manage-cards-title" className="mt-1 text-2xl font-bold">Manage cards</h2></div><button type="button" onClick={() => setIsManageCardsOpen(false)} className="text-2xl text-slate-500" aria-label="Close manage cards">×</button></div><div className="mt-5 space-y-2">{cards.map((card) => <div key={card.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3"><div className="min-w-0"><p className="truncate text-sm font-semibold">{card.name}</p><p className="text-xs text-slate-500">•••• {card.lastFour} · {card.isManual || card.issuer === 'POCKIT CARD' ? 'Manual card' : 'Connected account'}</p></div>{card.isManual || card.issuer === 'POCKIT CARD' ? <button type="button" onClick={() => { setCards((currentCards) => currentCards.filter((currentCard) => currentCard.id !== card.id)); setFocusedCardId((id) => id === card.id ? '' : id); setCurrentCardId((id) => id === card.id ? '' : id); }} className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">Delete</button> : <span className="shrink-0 text-[11px] text-slate-400">Connected</span>}</div>)}</div><p className="mt-4 text-xs text-slate-500">Deleting a manual card removes it from this Wallet view. Connected accounts must be managed through their bank connection.</p></div></div>}
+
+      <datalist id="credit-card-catalog">
+        {catalogCards.map((card) => <option key={card.cardId} value={card.name} label={`${card.issuer} · ${card.network}`} />)}
+      </datalist>
 
       {isModalOpen && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="add-card-title" className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"><div className="flex justify-between"><div><p className="text-sm font-semibold text-[#2865e9]">Wallets</p><h2 id="add-card-title" className="mt-1 text-2xl font-bold">Add credit card</h2></div><button type="button" onClick={() => setIsModalOpen(false)} className="text-2xl text-slate-500">×</button></div><form className="mt-6 space-y-4" onSubmit={addCard}><label className="block text-sm font-medium">Card name<input required value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Citi Double Cash" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><div className="grid grid-cols-2 gap-3"><label className="block text-sm font-medium">Last 4 digits<input required inputMode="numeric" maxLength={4} value={lastFour} onChange={(event) => setLastFour(event.target.value.replace(/\D/g, ''))} placeholder="1234" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><label className="block text-sm font-medium">Credit usage (cycle)<input required type="number" min="0" step="0.01" value={balance} onChange={(event) => setBalance(event.target.value)} placeholder="0.00" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label></div><label className="block text-sm font-medium">Credit limit<input required type="number" min="1" step="0.01" value={creditLimit} onChange={(event) => setCreditLimit(event.target.value)} placeholder="e.g. 5000" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><div className="border-t border-slate-200 pt-4"><div className="flex items-baseline justify-between"><p className="text-sm font-semibold">Monthly spending details</p><span className="text-xs text-slate-500">Optional</span></div><p className="mt-1 text-xs text-slate-500">These entries populate the Donut.</p><div className="mt-3 space-y-2">{newCategories.map((category, index) => <div key={index} className="grid grid-cols-[1fr_100px_32px] gap-2"><select value={spendingCategoryOptions.includes(category.label) ? category.label : 'Other'} onChange={(event) => updateNewCategory(index, 'label', event.target.value)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"><option value="Other">Other</option>{spendingCategoryOptions.filter((option) => option !== 'Other').map((option) => <option key={option} value={option}>{option}</option>)}</select><input type="number" min="0" step="0.01" value={category.amount || ''} onChange={(event) => updateNewCategory(index, 'amount', event.target.value)} placeholder="Amount" className="rounded-lg border border-slate-300 px-3 py-2 text-sm" /><button type="button" onClick={() => setNewCategories((categories) => categories.filter((_, categoryIndex) => categoryIndex !== index))} className="grid place-items-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500" aria-label="Remove spending category"><Trash2 size={16} aria-hidden="true" /></button></div>)}</div><button type="button" onClick={() => setNewCategories((categories) => [...categories, { label: 'Dining', amount: 0, color: manualCategoryColors[categories.length % manualCategoryColors.length] }])} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#2865e9]"><Plus size={15} aria-hidden="true" />Add spending category</button></div><div className="flex gap-3 pt-2"><button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 rounded-lg border border-slate-300 py-2.5 font-medium">Cancel</button><button type="submit" className="flex-1 rounded-lg bg-[#2865e9] py-2.5 font-medium text-white">Add card</button></div></form></div></div>}
       {manualEditorCard && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="manual-card-editor-title" className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"><div className="flex justify-between"><div><p className="text-sm font-semibold text-[#2865e9]">Manual credit card</p><h2 id="manual-card-editor-title" className="mt-1 text-2xl font-bold">Edit card & spending</h2></div><button type="button" onClick={() => setManualEditorCard(null)} className="text-2xl text-slate-500" aria-label="Close card editor">×</button></div><div className="mt-5 space-y-4"><label className="block text-sm font-medium">Card name<input value={manualName} onChange={(event) => setManualName(event.target.value)} className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><div className="grid grid-cols-2 gap-3"><label className="block text-sm font-medium">Credit usage (cycle)<input type="number" min="0" step="0.01" value={manualBalance} onChange={(event) => setManualBalance(event.target.value)} className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><label className="block text-sm font-medium">Credit limit<input type="number" min="1" step="0.01" value={manualLimit} onChange={(event) => setManualLimit(event.target.value)} className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label></div><div className="border-t border-slate-200 pt-4"><p className="text-sm font-semibold">Monthly spending categories</p><p className="mt-1 text-xs text-slate-500">These amounts drive the Donut. They may differ from the billing-cycle balance.</p><div className="mt-3 space-y-2">{manualCategories.map((category, index) => <div key={index} className="grid grid-cols-[1fr_100px_32px] gap-2"><select value={spendingCategoryOptions.includes(category.label) ? category.label : 'Other'} onChange={(event) => updateManualCategory(index, 'label', event.target.value)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"><option value="Other">Other</option>{spendingCategoryOptions.filter((option) => option !== 'Other').map((option) => <option key={option} value={option}>{option}</option>)}</select><input type="number" min="0" step="0.01" value={category.amount || ''} onChange={(event) => updateManualCategory(index, 'amount', event.target.value)} placeholder="Amount" className="rounded-lg border border-slate-300 px-3 py-2 text-sm" /><button type="button" onClick={() => setManualCategories((categories) => categories.filter((_, categoryIndex) => categoryIndex !== index))} className="grid place-items-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500" aria-label="Remove spending category"><Trash2 size={16} aria-hidden="true" /></button></div>)}</div><button type="button" onClick={() => setManualCategories((categories) => [...categories, { label: 'Dining', amount: 0, color: manualCategoryColors[categories.length % manualCategoryColors.length] }])} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#2865e9]"><Plus size={15} aria-hidden="true" />Add spending category</button></div><div className="flex gap-3 pt-2"><button type="button" onClick={() => setManualEditorCard(null)} className="flex-1 rounded-lg border border-slate-300 py-2.5 font-medium">Cancel</button><button type="button" onClick={saveManualCard} className="flex-1 rounded-lg bg-[#2865e9] py-2.5 font-medium text-white">Save changes</button></div></div></div></div>}
