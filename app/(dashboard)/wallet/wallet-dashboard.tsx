@@ -7,6 +7,7 @@ import { getRewardRulesForCard } from '@/lib/rewards/reward-rules';
 
 export type WalletCard = {
   id: string;
+  plaidItemId?: string;
   name: string;
   issuer: string;
   lastFour: string;
@@ -23,6 +24,12 @@ export type WalletCard = {
   hasSpendingData: boolean;
   categories: { label: string; amount: number; color: string }[];
   isManual?: boolean;
+};
+
+export type ConnectedPlaidBank = {
+  plaidItemId: string;
+  name: string;
+  accountCount: number;
 };
 
 type CatalogCard = { cardId: string; name: string; issuer: string; network: string; universalCashbackPercent: number };
@@ -135,7 +142,7 @@ function Donut({ card }: { card: WalletCard }) {
 
 type RewardEditorCard = Pick<WalletCard, 'id' | 'name' | 'rewardDetails'>;
 
-export default function WalletDashboard({ initialCards, cardholderName, spendingPeriodLabel, hasConnectedNonCreditAccounts }: { initialCards: WalletCard[]; cardholderName: string; spendingPeriodLabel: string; hasConnectedNonCreditAccounts: boolean }) {
+export default function WalletDashboard({ initialCards, cardholderName, spendingPeriodLabel, hasConnectedNonCreditAccounts, connectedBanks }: { initialCards: WalletCard[]; cardholderName: string; spendingPeriodLabel: string; hasConnectedNonCreditAccounts: boolean; connectedBanks: ConnectedPlaidBank[] }) {
   const router = useRouter();
   const [cards, setCards] = useState(initialCards);
   const [focusedCardId, setFocusedCardId] = useState(initialCards[0]?.id ?? '');
@@ -159,6 +166,8 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
   const [manualBalance, setManualBalance] = useState('');
   const [manualLimit, setManualLimit] = useState('');
   const [manualCategories, setManualCategories] = useState<WalletCard['categories']>([]);
+  const [disconnectingItemId, setDisconnectingItemId] = useState('');
+  const [disconnectError, setDisconnectError] = useState('');
 
   function focusCard(cardId: string) {
     setFocusedCardId(cardId);
@@ -209,6 +218,39 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
       router.refresh();
     } finally {
       window.setTimeout(() => setIsRefreshingSpending(false), 500);
+    }
+  }
+
+  async function disconnectPlaidItem(bank: ConnectedPlaidBank) {
+    const confirmed = window.confirm(
+      `Disconnect ${bank.name}? This removes ${bank.accountCount} connected account${bank.accountCount === 1 ? '' : 's'} from Wallets.`,
+    );
+    if (!confirmed) return;
+
+    setDisconnectError('');
+    setDisconnectingItemId(bank.plaidItemId);
+    try {
+      const response = await fetch('/api/plaid/disconnect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plaidItemId: bank.plaidItemId }),
+      });
+      const payload = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? 'Unable to disconnect this bank.');
+
+      const disconnectedCardIds = new Set(cards.filter(
+        (connectedCard) => connectedCard.plaidItemId === bank.plaidItemId,
+      ).map((connectedCard) => connectedCard.id));
+      setCards((currentCards) => currentCards.filter(
+        (connectedCard) => connectedCard.plaidItemId !== bank.plaidItemId,
+      ));
+      setFocusedCardId((id) => disconnectedCardIds.has(id) ? '' : id);
+      setCurrentCardId((id) => disconnectedCardIds.has(id) ? '' : id);
+      router.refresh();
+    } catch (error) {
+      setDisconnectError(error instanceof Error ? error.message : 'Unable to disconnect this bank.');
+    } finally {
+      setDisconnectingItemId('');
     }
   }
 
@@ -368,7 +410,44 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
           </section>
       </main>
 
-      {isManageCardsOpen && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="manage-cards-title" className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"><div className="flex items-start justify-between"><div><p className="text-sm font-semibold text-[#2865e9]">Wallets</p><h2 id="manage-cards-title" className="mt-1 text-2xl font-bold">Manage cards</h2></div><button type="button" onClick={() => setIsManageCardsOpen(false)} className="text-2xl text-slate-500" aria-label="Close manage cards">×</button></div><div className="mt-5 space-y-2">{cards.map((card) => <div key={card.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3"><div className="min-w-0"><p className="truncate text-sm font-semibold">{card.name}</p><p className="text-xs text-slate-500">•••• {card.lastFour} · {card.isManual || card.issuer === 'POCKIT CARD' ? 'Manual card' : 'Connected account'}</p></div>{card.isManual || card.issuer === 'POCKIT CARD' ? <button type="button" onClick={() => { setCards((currentCards) => currentCards.filter((currentCard) => currentCard.id !== card.id)); setFocusedCardId((id) => id === card.id ? '' : id); setCurrentCardId((id) => id === card.id ? '' : id); }} className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">Delete</button> : <span className="shrink-0 text-[11px] text-slate-400">Connected</span>}</div>)}</div><p className="mt-4 text-xs text-slate-500">Deleting a manual card removes it from this Wallet view. Connected accounts must be managed through their bank connection.</p></div></div>}
+      {isManageCardsOpen && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="manage-cards-title" className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between">
+              <div><p className="text-sm font-semibold text-[#2865e9]">Wallets</p><h2 id="manage-cards-title" className="mt-1 text-2xl font-bold">Manage cards</h2></div>
+              <button type="button" onClick={() => setIsManageCardsOpen(false)} className="text-2xl text-slate-500" aria-label="Close manage cards">×</button>
+            </div>
+            <div className="mt-5 space-y-4">
+              {cards.filter((card) => card.isManual || card.issuer === 'POCKIT CARD').length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Manual cards</p>
+                  {cards.filter((card) => card.isManual || card.issuer === 'POCKIT CARD').map((card) => (
+                    <div key={card.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3">
+                      <div className="min-w-0"><p className="truncate text-sm font-semibold">{card.name}</p><p className="text-xs text-slate-500">•••• {card.lastFour} · Manual card</p></div>
+                      <button type="button" onClick={() => { setCards((currentCards) => currentCards.filter((currentCard) => currentCard.id !== card.id)); setFocusedCardId((id) => id === card.id ? '' : id); setCurrentCardId((id) => id === card.id ? '' : id); }} className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">Delete</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {connectedBanks.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Connected banks</p>
+                  {connectedBanks.map((bank) => (
+                    <div key={bank.plaidItemId} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3">
+                      <div className="min-w-0"><p className="truncate text-sm font-semibold">{bank.name}</p><p className="text-xs text-slate-500">{bank.accountCount} connected account{bank.accountCount === 1 ? '' : 's'}</p></div>
+                      <button type="button" onClick={() => void disconnectPlaidItem(bank)} disabled={disconnectingItemId === bank.plaidItemId} className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60">
+                        {disconnectingItemId === bank.plaidItemId ? 'Disconnecting…' : 'Disconnect'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {disconnectError && <p role="alert" className="mt-3 text-sm text-red-600">{disconnectError}</p>}
+            <p className="mt-4 text-xs text-slate-500">Disconnecting a bank revokes its Plaid connection and removes every connected account from Wallets. Manual cards can be deleted individually.</p>
+          </div>
+        </div>
+      )}
 
       <datalist id="credit-card-catalog">
         {catalogCards.map((card) => <option key={card.cardId} value={card.name} label={`${card.issuer} · ${card.network}`} />)}

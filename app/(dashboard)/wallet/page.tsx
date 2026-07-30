@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import WalletDashboard, { type WalletCard } from './wallet-dashboard';
+import WalletDashboard, { type ConnectedPlaidBank, type WalletCard } from './wallet-dashboard';
 import { findCatalogCard, getCardCatalog } from '@/lib/rewards/card-catalog';
 import { getRewardRulesForCard } from '@/lib/rewards/reward-rules';
 import { getSpendingCategories } from '@/lib/plaid-spending';
@@ -78,6 +78,18 @@ export default async function WalletPage() {
   const creditCardAccounts = (accounts ?? []).filter(
     (account) => account.type?.toLowerCase() === 'credit',
   );
+  const connectedBanks = Object.values((accounts ?? []).reduce<Record<string, ConnectedPlaidBank>>(
+    (banks, account) => {
+      const existing = banks[account.plaid_item_id];
+      banks[account.plaid_item_id] = {
+        plaidItemId: account.plaid_item_id,
+        name: existing?.name ?? account.official_name ?? account.name,
+        accountCount: (existing?.accountCount ?? 0) + 1,
+      };
+      return banks;
+    },
+    {},
+  ));
 
   const spendingCategories = await getSpendingCategories(
     user.id,
@@ -131,6 +143,7 @@ export default async function WalletPage() {
 
     return {
       id: account.id,
+      plaidItemId: account.plaid_item_id,
       name: account.name,
       issuer: (account.subtype ?? account.type ?? 'CONNECTED ACCOUNT').toUpperCase(),
       lastFour: account.mask ?? '••••',
@@ -153,6 +166,7 @@ export default async function WalletPage() {
       hasConnectedNonCreditAccounts={(accounts ?? []).some(
         (account) => account.type?.toLowerCase() !== 'credit',
       )}
+      connectedBanks={connectedBanks}
     />
   );
 }
