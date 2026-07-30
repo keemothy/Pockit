@@ -48,6 +48,19 @@ function normalizeCardName(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+function displayIssuerName(issuer: string): string {
+  const trimmedIssuer = issuer.trim();
+  if (trimmedIssuer !== trimmedIssuer.toUpperCase()) return trimmedIssuer;
+  return trimmedIssuer.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+export function displayCatalogCardName(card: Pick<CardCatalogEntry, 'issuer' | 'name'>): string {
+  const issuer = displayIssuerName(card.issuer);
+  return card.name.toLowerCase().startsWith(issuer.toLowerCase())
+    ? card.name
+    : `${issuer} ${card.name}`;
+}
+
 function isCatalogCard(value: unknown): value is CatalogCardSource {
   if (typeof value !== 'object' || value === null) return false;
   const card = value as Partial<CatalogCardSource>;
@@ -96,12 +109,12 @@ export function findCatalogCard(
     .map(normalizeCardName);
 
   return catalog.find((card) => {
-    const catalogName = normalizeCardName(card.name);
+    const cardNames = [card.name, displayCatalogCardName(card)].map(normalizeCardName);
     return candidates.some(
       (candidate) =>
-        candidate === catalogName ||
-        (candidate.length >= 8 &&
-          (candidate.includes(catalogName) || catalogName.includes(candidate))),
+        cardNames.some((catalogName) => candidate === catalogName ||
+          (candidate.length >= 8 &&
+            (candidate.includes(catalogName) || catalogName.includes(candidate)))),
     );
   });
 }

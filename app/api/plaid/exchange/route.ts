@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hasPlaidCredentials, plaidClient } from "@/lib/plaid";
+import { getPlaidEnvironment, hasPlaidCredentials, plaidClient } from "@/lib/plaid";
 import { encryptAccessToken } from "@/lib/plaid-crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -74,6 +74,20 @@ export async function POST(request: NextRequest) {
     }));
     const { error: accountsError } = await admin.from("financial_accounts").upsert(accountRows, { onConflict: "plaid_account_id" });
     if (accountsError) throw accountsError;
+
+    // Sandbox, Development, and Production access tokens are not
+    // interchangeable. Keep an environment marker per local Item so Wallets
+    // never displays test accounts while running against a real account.
+    const metadata = user.user_metadata as Record<string, unknown>;
+    const currentEnvironments = metadata.plaid_item_environments;
+    const itemEnvironments = currentEnvironments && typeof currentEnvironments === "object" && !Array.isArray(currentEnvironments)
+      ? { ...currentEnvironments as Record<string, unknown> }
+      : {};
+    itemEnvironments[plaidItem.id] = getPlaidEnvironment();
+    const { error: metadataError } = await supabase.auth.updateUser({
+      data: { plaid_item_environments: itemEnvironments },
+    });
+    if (metadataError) throw metadataError;
 
     return NextResponse.json({
       itemId: exchange.data.item_id,

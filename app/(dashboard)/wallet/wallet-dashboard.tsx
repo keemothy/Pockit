@@ -21,6 +21,7 @@ export type WalletCard = {
     rewardCurrency: string;
   }[];
   rewardsMatched: boolean;
+  catalogCardId?: string;
   hasSpendingData: boolean;
   categories: { label: string; amount: number; color: string }[];
   isManual?: boolean;
@@ -33,6 +34,28 @@ export type ConnectedPlaidBank = {
 };
 
 type CatalogCard = { cardId: string; name: string; issuer: string; network: string; universalCashbackPercent: number };
+
+function displayIssuerName(issuer: string) {
+  const trimmedIssuer = issuer.trim();
+  if (trimmedIssuer !== trimmedIssuer.toUpperCase()) return trimmedIssuer;
+  return trimmedIssuer.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function displayCatalogCardName(card: CatalogCard) {
+  const issuer = displayIssuerName(card.issuer);
+  return card.name.toLowerCase().startsWith(issuer.toLowerCase()) ? card.name : `${issuer} ${card.name}`;
+}
+
+function cardCatalogMatchesName(card: CatalogCard, value: string) {
+  const query = value.trim().toLowerCase();
+  return Boolean(query) && [card.name, displayCatalogCardName(card)].some((name) => name.toLowerCase() === query);
+}
+
+function cardCatalogMatchesSearch(card: CatalogCard, value: string) {
+  const query = value.trim().toLowerCase();
+  return !query || [displayCatalogCardName(card), card.name, card.issuer]
+    .some((candidate) => candidate.toLowerCase().includes(query));
+}
 
 function catalogRewardDetails(card: CatalogCard | undefined) {
   if (!card) return [];
@@ -156,6 +179,10 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
   const [creditLimit, setCreditLimit] = useState('');
   const [newCategories, setNewCategories] = useState<WalletCard['categories']>([]);
   const [catalogCards, setCatalogCards] = useState<CatalogCard[]>([]);
+  const [cardMatcherCard, setCardMatcherCard] = useState<WalletCard | null>(null);
+  const [catalogSearch, setCatalogSearch] = useState('');
+  const [isSavingCardMatch, setIsSavingCardMatch] = useState(false);
+  const [cardMatchError, setCardMatchError] = useState('');
   const [isRefreshingSpending, setIsRefreshingSpending] = useState(false);
   const [rewardEditorCard, setRewardEditorCard] = useState<RewardEditorCard | null>(null);
   const [editableRewards, setEditableRewards] = useState<WalletCard['rewardDetails']>([]);
@@ -178,12 +205,12 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
   }
 
   useEffect(() => {
-    if (!isModalOpen || catalogCards.length > 0) return;
+    if ((!isModalOpen && !cardMatcherCard) || catalogCards.length > 0) return;
     fetch('/api/cards/catalog')
       .then((response) => response.ok ? response.json() : { cards: [] })
       .then((payload: { cards?: CatalogCard[] }) => setCatalogCards(payload.cards ?? []))
       .catch(() => setCatalogCards([]));
-  }, [isModalOpen, catalogCards.length]);
+  }, [isModalOpen, cardMatcherCard, catalogCards.length]);
 
   function addCard(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -192,9 +219,9 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
     const parsedLimit = Number.parseFloat(creditLimit);
     if (!name.trim() || normalizedLastFour.length !== 4 || Number.isNaN(parsedBalance) || Number.isNaN(parsedLimit) || parsedLimit <= 0) return;
 
-    const catalogMatch = catalogCards.find((catalogCard) => catalogCard.name.toLowerCase() === name.trim().toLowerCase());
+    const catalogMatch = catalogCards.find((catalogCard) => cardCatalogMatchesName(catalogCard, name));
     const card: WalletCard = {
-      id: crypto.randomUUID(), name: name.trim(), issuer: 'CREDIT CARD', lastFour: normalizedLastFour,
+      id: crypto.randomUUID(), name: catalogMatch ? displayCatalogCardName(catalogMatch) : name.trim(), issuer: 'CREDIT CARD', lastFour: normalizedLastFour,
       cardholderName, currentBalance: parsedBalance, limit: parsedLimit, color: 'blue',
       rewardDetails: catalogRewardDetails(catalogMatch), rewardsMatched: Boolean(catalogMatch),
       hasSpendingData: newCategories.some((category) => category.amount > 0),
@@ -253,6 +280,41 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
     setRewardEditorCard(card);
     setEditableRewards(card.rewardDetails);
     setRewardSaveError('');
+  }
+
+  function openCardMatcher(card: WalletCard) {
+    setCardMatcherCard(card);
+    setCatalogSearch(card.name);
+    setCardMatchError('');
+  }
+
+  async function saveCardMatch(catalogCard: CatalogCard) {
+    if (!cardMatcherCard) return;
+    setIsSavingCardMatch(true);
+    setCardMatchError('');
+    try {
+      const response = await fetch('/api/cards/identity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardId: cardMatcherCard.id, catalogCardId: catalogCard.cardId }),
+      });
+      const payload = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? 'Unable to save the card match.');
+
+      setCards((currentCards) => currentCards.map((card) => card.id === cardMatcherCard.id ? {
+        ...card,
+        name: displayCatalogCardName(catalogCard),
+        catalogCardId: catalogCard.cardId,
+        rewardDetails: catalogRewardDetails(catalogCard),
+        rewardsMatched: true,
+      } : card));
+      setCardMatcherCard(null);
+      router.refresh();
+    } catch (error) {
+      setCardMatchError(error instanceof Error ? error.message : 'Unable to save the card match.');
+    } finally {
+      setIsSavingCardMatch(false);
+    }
   }
 
   function openManualEditor(card: WalletCard) {
@@ -384,7 +446,7 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
               return (
                 <article id={`wallet-card-${card.id}`} key={card.id} className={`relative scroll-mt-6 rounded-[24px] border-2 bg-white p-4 shadow-md transition ${isCurrentCard ? 'border-[#3b82f6] shadow-[0_0_0_4px_rgba(147,197,253,0.38)]' : focusedCardId === card.id ? 'border-[#a8ccff]' : 'border-slate-100'}`}>
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3"><h2 className="text-xl font-bold">{card.name}</h2>{(card.isManual || card.issuer === 'POCKIT CARD') && <button type="button" onClick={() => openManualEditor(card)} className="inline-flex items-center gap-1 text-xs font-medium text-[#2865e9] hover:underline"><Pencil size={13} aria-hidden="true" />Edit card</button>}</div>
+                    <div className="flex items-center gap-3"><h2 className="text-xl font-bold">{card.name}</h2>{(card.isManual || card.issuer === 'POCKIT CARD') ? <button type="button" onClick={() => openManualEditor(card)} className="inline-flex items-center gap-1 text-xs font-medium text-[#2865e9] hover:underline"><Pencil size={13} aria-hidden="true" />Edit card</button> : <button type="button" onClick={() => openCardMatcher(card)} className="inline-flex items-center gap-1 text-xs font-medium text-[#2865e9] hover:underline"><Pencil size={13} aria-hidden="true" />{card.catalogCardId ? 'Change card' : 'Match card'}</button>}</div>
                     <button type="button" onClick={() => { setCurrentCardId(card.id); setFocusedCardId(card.id); }} aria-pressed={isCurrentCard} className="shrink-0 text-center">
                       <span className={`flex h-5 w-16 overflow-hidden rounded-full ${isCurrentCard ? 'bg-[#a9c9ff]' : 'bg-[#eeeeee]'}`} aria-hidden="true">
                         <span className={`h-full w-8 rounded-full ${isCurrentCard ? 'ml-auto bg-[#2865e9]' : 'bg-[#cfcfcf]'}`} />
@@ -444,8 +506,10 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
         </div>
       )}
 
+      {cardMatcherCard && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="card-matcher-title" className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"><div className="flex justify-between gap-4"><div><p className="text-sm font-semibold text-[#2865e9]">Connected card</p><h2 id="card-matcher-title" className="mt-1 text-2xl font-bold">Match your card</h2><p className="mt-1 text-sm text-slate-500">Plaid returned a generic account name. Choose the exact card to apply its reward rates.</p></div><button type="button" onClick={() => setCardMatcherCard(null)} className="text-2xl text-slate-500" aria-label="Close card matcher">×</button></div><label className="mt-5 block text-sm font-medium">Search card<input autoFocus value={catalogSearch} onChange={(event) => setCatalogSearch(event.target.value)} placeholder="e.g. Chase Sapphire Preferred" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><div className="mt-3 max-h-72 space-y-2 overflow-y-auto">{catalogCards.filter((catalogCard) => cardCatalogMatchesSearch(catalogCard, catalogSearch)).map((catalogCard) => <button key={catalogCard.cardId} type="button" disabled={isSavingCardMatch} onClick={() => void saveCardMatch(catalogCard)} className="w-full rounded-xl border border-slate-200 p-3 text-left transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-wait"><span className="block text-sm font-semibold">{displayCatalogCardName(catalogCard)}</span><span className="mt-0.5 block text-xs text-slate-500">{displayIssuerName(catalogCard.issuer)} · {catalogCard.network}</span></button>)}{catalogCards.length > 0 && catalogCards.filter((catalogCard) => cardCatalogMatchesSearch(catalogCard, catalogSearch)).length === 0 && <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-500">No matching card found. Try a shorter name.</p>}{catalogCards.length === 0 && <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-500">Loading the card catalog…</p>}</div>{cardMatchError && <p role="alert" className="mt-3 text-sm text-red-600">{cardMatchError}</p>}<button type="button" onClick={() => setCardMatcherCard(null)} className="mt-5 w-full rounded-lg border border-slate-300 py-2.5 font-medium">Cancel</button></div></div>}
+
       <datalist id="credit-card-catalog">
-        {catalogCards.map((card) => <option key={card.cardId} value={card.name} label={`${card.issuer} · ${card.network}`} />)}
+        {catalogCards.map((card) => <option key={card.cardId} value={displayCatalogCardName(card)} label={`${displayIssuerName(card.issuer)} · ${card.network}`} />)}
       </datalist>
 
       {isModalOpen && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div role="dialog" aria-modal="true" aria-labelledby="add-card-title" className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"><div className="flex justify-between"><div><p className="text-sm font-semibold text-[#2865e9]">Wallets</p><h2 id="add-card-title" className="mt-1 text-2xl font-bold">Add credit card</h2></div><button type="button" onClick={() => setIsModalOpen(false)} className="text-2xl text-slate-500">×</button></div><form className="mt-6 space-y-4" onSubmit={addCard}><label className="block text-sm font-medium">Card name<input required list="credit-card-catalog" value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Citi Double Cash" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><div className="grid grid-cols-2 gap-3"><label className="block text-sm font-medium">Last 4 digits<input required inputMode="numeric" maxLength={4} value={lastFour} onChange={(event) => setLastFour(event.target.value.replace(/\D/g, ''))} placeholder="1234" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><label className="block text-sm font-medium">Credit usage (cycle)<input required type="number" min="0" step="0.01" value={balance} onChange={(event) => setBalance(event.target.value)} placeholder="0.00" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label></div><label className="block text-sm font-medium">Credit limit<input required type="number" min="1" step="0.01" value={creditLimit} onChange={(event) => setCreditLimit(event.target.value)} placeholder="e.g. 5000" className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500" /></label><div className="border-t border-slate-200 pt-4"><div className="flex items-baseline justify-between"><p className="text-sm font-semibold">Monthly spending details</p><span className="text-xs text-slate-500">Optional</span></div><p className="mt-1 text-xs text-slate-500">These entries populate the Donut.</p><div className="mt-3 space-y-2">{newCategories.map((category, index) => <div key={index} className="grid grid-cols-[1fr_100px_32px] gap-2"><select value={spendingCategoryOptions.includes(category.label) ? category.label : 'Other'} onChange={(event) => updateNewCategory(index, 'label', event.target.value)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"><option value="Other">Other</option>{spendingCategoryOptions.filter((option) => option !== 'Other').map((option) => <option key={option} value={option}>{option}</option>)}</select><input type="number" min="0" step="0.01" value={category.amount || ''} onChange={(event) => updateNewCategory(index, 'amount', event.target.value)} placeholder="Amount" className="rounded-lg border border-slate-300 px-3 py-2 text-sm" /><button type="button" onClick={() => setNewCategories((categories) => categories.filter((_, categoryIndex) => categoryIndex !== index))} className="grid place-items-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500" aria-label="Remove spending category"><Trash2 size={16} aria-hidden="true" /></button></div>)}</div><button type="button" onClick={() => setNewCategories((categories) => [...categories, { label: 'Dining', amount: 0, color: manualCategoryColors[categories.length % manualCategoryColors.length] }])} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#2865e9]"><Plus size={15} aria-hidden="true" />Add spending category</button></div><div className="flex gap-3 pt-2"><button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 rounded-lg border border-slate-300 py-2.5 font-medium">Cancel</button><button type="submit" className="flex-1 rounded-lg bg-[#2865e9] py-2.5 font-medium text-white">Add card</button></div></form></div></div>}

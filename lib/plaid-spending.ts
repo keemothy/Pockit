@@ -42,31 +42,55 @@ export async function getSpendingCategories(
   const totals = new Map<string, number>();
   await Promise.all(items.map(async (item) => {
     const linkedAccounts = accountsByItem.get(item.id) ?? [];
-    const response = await plaidClient.transactionsGet({
-      access_token: decryptAccessToken({
+    try {
+      const accessToken = decryptAccessToken({
         ciphertext: item.access_token_ciphertext,
         iv: item.access_token_iv,
         authTag: item.access_token_auth_tag,
-      }),
-      // The wallet donut is a calendar-month summary, not a rolling window.
-      start_date: isoDateMonthStart(),
-      end_date: new Date().toISOString().slice(0, 10),
-      options: {
-        account_ids: linkedAccounts.map((account) => account.plaidAccountId),
-        include_original_description: false,
-        personal_finance_category_version: PersonalFinanceCategoryVersion.V2,
-      },
-    });
+      });
 
-    for (const transaction of response.data.transactions) {
-      if (transaction.amount <= 0) continue;
-      const category = transaction.personal_finance_category?.primary ?? 'OTHER';
-      const key = `${transaction.account_id}:${category}`;
-      totals.set(key, (totals.get(key) ?? 0) + transaction.amount);
+      const response = await plaidClient.transactionsGet({
+        access_token: accessToken,
+        // The wallet donut is a calendar-month summary, not a rolling window.
+        start_date: isoDateMonthStart(),
+        end_date: new Date().toISOString().slice(0, 10),
+        options: {
+          account_ids: linkedAccounts.map((account) => account.plaidAccountId),
+          include_original_description: false,
+          personal_finance_category_version: PersonalFinanceCategoryVersion.V2,
+        },
+      });
+
+      // Development-only inspection aid. Transactions remain in memory and
+      // are never persisted; do not enable this log in production.
+      if (process.env.NODE_ENV !== 'production') {
+        console.info('Plaid Wallet transactions response', {
+          plaidItemId: item.id,
+          requestedAccountIds: linkedAccounts.map((account) => account.plaidAccountId),
+          totalTransactions: response.data.total_transactions,
+          transactions: response.data.transactions,
+        });
+      }
+
+      for (const transaction of response.data.transactions) {
+        if (transaction.amount <= 0) continue;
+        const category = transaction.personal_finance_category?.primary ?? 'OTHER';
+        const key = `${transaction.account_id}:${category}`;
+        totals.set(key, (totals.get(key) ?? 0) + transaction.amount);
+      }
+    } catch (error) {
+      // One institution can still be preparing Transactions data. Do not let
+      // that suppress spending summaries for the user's other connected cards.
+      if (process.env.NODE_ENV !== 'production') {
+        console.info('Plaid Wallet skipped an unavailable connection', {
+          plaidItemId: item.id,
+          message: error instanceof Error ? error.message : 'Unknown Plaid error',
+        });
+      }
     }
   }));
 
-  return [...totals.entries()].map(([key, amount]) => {
+  const categories = [...totals.entries()].map(([key, amount]) => {
     const separator = key.indexOf(':');
     return {
       accountId: key.slice(0, separator),
@@ -74,4 +98,10 @@ export async function getSpendingCategories(
       amount,
     };
   });
+
+  if (process.env.NODE_ENV !== 'production') {
+    console.info('Plaid Wallet category totals', categories);
+  }
+
+  return categories;
 }
