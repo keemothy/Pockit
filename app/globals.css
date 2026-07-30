@@ -41,6 +41,55 @@ body {
   65%        { transform: translate(50px,  30px) scale(1.15); }
 }
 
+/* ── Animated gradient border (@property) ─────────────── */
+@property --gradient-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes spin-gradient {
+  to { --gradient-angle: 360deg; }
+}
+.gradient-border-card {
+  position: relative;
+  padding: 1px;
+  border-radius: 28px;
+  background: conic-gradient(
+    from var(--gradient-angle),
+    #1F78FF 0deg,
+    #a855f7 90deg,
+    #ec4899 180deg,
+    #22d3ee 270deg,
+    #1F78FF 360deg
+  );
+  animation: spin-gradient 6s linear infinite;
+}
+
+/* ── Animated gradient text ────────────────────────────── */
+@keyframes gradient-text-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+.animated-gradient-text {
+  background-image: linear-gradient(90deg, #57BEFE 0%, #a855f7 35%, #ec4899 65%, #57BEFE 100%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-text-shift 6s ease-in-out infinite;
+}
+
+/* ── Noise texture overlay ─────────────────────────────── */
+.noise-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.055;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
 /* ── Shimmer skeleton ──────────────────────────────────── */
 @keyframes shimmer {
   0%   { transform: translateX(-100%); }
