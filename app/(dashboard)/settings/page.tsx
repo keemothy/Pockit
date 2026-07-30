@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function SettingsPage() {
-  return <h1 className="text-black">Settings</h1>;
+  redirect("/settings/profile");
 }
