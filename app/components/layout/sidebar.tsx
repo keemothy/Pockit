@@ -74,7 +74,10 @@ export default function Sidebar() {
 
       <ul className="mt-10 space-y-5">
         {links.map((link) => {
-          const isActive = pathname === link.href;
+          const isActive =
+            link.href === "/"
+              ? pathname === "/"
+              : pathname === link.href || pathname.startsWith(link.href + "/");
           const Icon = link.icon;
 
           return (

@@ -1,0 +1,1343 @@
+[
+  {
+    "id": "chase-amazon-prime-visa",
+    "name": "Amazon Prime Visa",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "rewards": {
+      "amazon": "5% cash back",
+      "whole_foods": "5% cash back",
+      "dining": "2% cash back",
+      "gas_stations": "2% cash back",
+      "local_transit": "2% cash back",
+      "other": "1% cash back"
+    },
+    "benefits": [
+      "No annual fee (requires Amazon Prime membership ~$139/yr)",
+      "No foreign transaction fees",
+      "Instant rewards — cash back applied at checkout on Amazon",
+      "Travel accident insurance"
+    ],
+    "best_for": [
+      "Amazon shoppers",
+      "Whole Foods shoppers",
+      "frequent online shoppers"
+    ],
+    "sign_up_bonus": "$100 Amazon gift card upon approval",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "amex-gold",
+    "name": "American Express Gold Card",
+    "issuer": "American Express",
+    "annual_fee": 250,
+    "rewards": {
+      "dining_us": "4x Membership Rewards points",
+      "groceries_us": "4x points (up to $25,000/year)",
+      "flights_amex_travel": "3x points",
+      "other": "1x points"
+    },
+    "benefits": [
+      "$120 dining credit ($10/month at Grubhub, Cheesecake Factory, Goldbelly, etc.)",
+      "$120 Uber Cash ($10/month for Uber Eats or Uber rides)",
+      "$100 hotel credit via Amex Travel",
+      "No foreign transaction fees",
+      "Trip delay insurance",
+      "Baggage insurance"
+    ],
+    "best_for": [
+      "dining",
+      "groceries",
+      "foodies",
+      "Uber Eats users",
+      "international travel"
+    ],
+    "sign_up_bonus": "60,000 points after $6,000 spend in 6 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good to Excellent (700+)"
+  },
+  {
+    "id": "amex-green",
+    "name": "American Express Green Card",
+    "issuer": "American Express",
+    "annual_fee": 150,
+    "rewards": {
+      "travel": "3x points",
+      "dining": "3x points",
+      "transit": "3x points",
+      "other": "1x points"
+    },
+    "benefits": [
+      "$189 CLEAR Plus credit (biometric airport security)",
+      "$100 LoungeBuddy credit",
+      "No foreign transaction fees",
+      "Trip delay insurance",
+      "Car rental loss and damage insurance"
+    ],
+    "best_for": [
+      "travel",
+      "dining",
+      "transit users",
+      "CLEAR members",
+      "mid-tier travel card"
+    ],
+    "sign_up_bonus": "40,000 points after $3,000 spend in 6 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "amex-platinum",
+    "name": "American Express Platinum Card",
+    "issuer": "American Express",
+    "annual_fee": 695,
+    "rewards": {
+      "flights_amex_travel": "5x points",
+      "hotels_amex_travel": "5x points",
+      "other": "1x points"
+    },
+    "benefits": [
+      "$200 annual airline fee credit",
+      "$200 hotel credit via Fine Hotels + Resorts",
+      "$240 digital entertainment credit (Disney+, NYT, Peacock, etc.)",
+      "$155 Walmart+ credit",
+      "$300 Equinox credit",
+      "$100 Global Entry / TSA PreCheck credit",
+      "Centurion Lounge + Priority Pass airport lounge access",
+      "Marriott Bonvoy Gold status + Hilton Honors Gold status",
+      "No foreign transaction fees"
+    ],
+    "best_for": [
+      "frequent travelers",
+      "luxury travel",
+      "airport lounges",
+      "premium perks"
+    ],
+    "sign_up_bonus": "80,000 points after $8,000 spend in 6 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Excellent (720+)"
+  },
+  {
+    "id": "amex-blue-cash-everyday",
+    "name": "Amex Blue Cash Everyday",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "rewards": {
+      "us_supermarkets": "3% cash back (up to $6,000/year)",
+      "us_gas_stations": "3% cash back",
+      "us_online_retail": "3% cash back",
+      "other": "1% cash back"
+    },
+    "benefits": [
+      "No annual fee",
+      "$84/year in Disney Bundle credits ($7/month)",
+      "$156/year in Home Chef credits ($15/month)",
+      "0% intro APR for 15 months"
+    ],
+    "best_for": [
+      "groceries",
+      "gas",
+      "online shopping",
+      "no annual fee",
+      "Disney+ subscribers"
+    ],
+    "sign_up_bonus": "$200 after $2,000 spend in 6 months",
+    "foreign_transaction_fee": true,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "amex-blue-cash-preferred",
+    "name": "Amex Blue Cash Preferred",
+    "issuer": "American Express",
+    "annual_fee": 95,
+    "rewards": {
+      "us_supermarkets": "6% cash back (up to $6,000/year)",
+      "select_streaming": "6% cash back (Netflix, Hulu, Disney+, Spotify, etc.)",
+      "us_gas_stations": "3% cash back",
+      "transit": "3% cash back",
+      "other": "1% cash back"
+    },
+    "benefits": [
+      "Best grocery card for heavy supermarket shoppers",
+      "6% on streaming services",
+      "0% intro APR for 12 months",
+      "Car rental loss and damage insurance"
+    ],
+    "best_for": [
+      "groceries",
+      "streaming services",
+      "families",
+      "supermarket shoppers",
+      "gas"
+    ],
+    "sign_up_bonus": "$250 after $3,000 spend in 6 months",
+    "foreign_transaction_fee": true,
+    "credit_score_needed": "Good to Excellent (670+)"
+  },
+  {
+    "id": "apple-card",
+    "name": "Apple Card",
+    "issuer": "Goldman Sachs / Apple",
+    "annual_fee": 0,
+    "rewards": {
+      "apple_and_apple_pay_merchants": "3% Daily Cash (Apple Store, App Store, Uber, Nike, T-Mobile, etc.)",
+      "apple_pay": "2% Daily Cash",
+      "physical_card": "1% Daily Cash"
+    },
+    "benefits": [
+      "No annual fee, no foreign transaction fee, no late fees",
+      "Daily Cash paid every day",
+      "Built into iPhone Wallet app with beautiful spending insights",
+      "Titanium physical card",
+      "Interest-free Monthly Installments for Apple products",
+      "Privacy-focused — no card number on physical card"
+    ],
+    "best_for": [
+      "Apple ecosystem users",
+      "iPhone users",
+      "Apple purchases",
+      "privacy-focused users"
+    ],
+    "sign_up_bonus": "None",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Fair to Good (600+)"
+  },
+  {
+    "id": "bank-of-america-customized-cash",
+    "name": "Bank of America Customized Cash Rewards",
+    "issuer": "Bank of America",
+    "annual_fee": 0,
+    "rewards": {
+      "chosen_category": "3% cash back in your chosen category (gas, online shopping, dining, travel, drug stores, or home improvement)",
+      "grocery_wholesale": "2% cash back (up to $2,500/quarter combined with chosen category)",
+      "other": "1% cash back"
+    },
+    "benefits": [
+      "No annual fee",
+      "Choose your 3% category each month",
+      "Preferred Rewards members earn 25-75% more on every purchase",
+      "0% intro APR for 15 billing cycles"
+    ],
+    "best_for": [
+      "flexible category rewards",
+      "Bank of America customers",
+      "Preferred Rewards members",
+      "no annual fee"
+    ],
+    "sign_up_bonus": "$200 after $1,000 spend in 90 days",
+    "foreign_transaction_fee": true,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "bank-of-america-premium-rewards",
+    "name": "Bank of America Premium Rewards",
+    "issuer": "Bank of America",
+    "annual_fee": 95,
+    "rewards": {
+      "travel_dining": "2 points per $1",
+      "other": "1.5 points per $1"
+    },
+    "benefits": [
+      "$100 annual airline incidental fee credit",
+      "$100 Global Entry / TSA PreCheck credit (every 4 years)",
+      "No foreign transaction fees",
+      "Preferred Rewards members earn 25-75% more (top tier = 3.5 points on travel/dining, 2.625 on everything)",
+      "Trip cancellation/interruption insurance",
+      "Baggage delay insurance"
+    ],
+    "best_for": [
+      "Bank of America Preferred Rewards members",
+      "travel and dining",
+      "loyalty customers"
+    ],
+    "sign_up_bonus": "60,000 points after $4,000 spend in 90 days ($600 value)",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good to Excellent (690+)"
+  },
+  {
+    "id": "bank-of-america-travel-rewards",
+    "name": "Bank of America Travel Rewards Credit Card",
+    "issuer": "Bank of America",
+    "annual_fee": 0,
+    "rewards": {
+      "everything": "1.5x points on all purchases"
+    },
+    "benefits": [
+      "No annual fee",
+      "No foreign transaction fees",
+      "Points never expire",
+      "Up to 3.5x points for Bank of America Preferred Rewards Platinum Honors members",
+      "Redeem for any travel purchase — no airline or hotel restrictions"
+    ],
+    "best_for": [
+      "no annual fee travel",
+      "Bank of America customers",
+      "simplicity",
+      "flexible travel redemption"
+    ],
+    "sign_up_bonus": "25,000 points after $1,000 spend in 90 days ($250 travel value)",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "bilt-mastercard",
+    "name": "Bilt Mastercard",
+    "issuer": "Wells Fargo / Bilt",
+    "annual_fee": 0,
+    "rewards": {
+      "rent": "1x points (no processing fee — unique benefit)",
+      "dining": "3x points",
+      "travel": "2x points",
+      "other": "1x point"
+    },
+    "benefits": [
+      "No annual fee",
+      "Pay rent with points and no processing fee (most cards charge 2-3%)",
+      "Transfer to 14 airline and hotel partners (United, American, Air Canada, Hyatt, Marriott, etc.)",
+      "No foreign transaction fees",
+      "Trip cancellation insurance",
+      "Cell phone protection",
+      "Rent Day promotions (2x on all categories on 1st of every month)"
+    ],
+    "best_for": [
+      "renters",
+      "people who pay rent by credit card",
+      "travel rewards",
+      "dining"
+    ],
+    "sign_up_bonus": "No traditional welcome bonus — earn points through spending",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "capital-one-platinum",
+    "name": "Capital One Platinum",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "rewards": { "note": "No rewards program — credit-building card only" },
+    "benefits": [
+      "No annual fee",
+      "No rewards — purely a credit-building card",
+      "Automatic credit limit review after 6 months",
+      "No foreign transaction fees",
+      "CreditWise credit monitoring"
+    ],
+    "best_for": [
+      "building credit",
+      "fair credit",
+      "first credit card",
+      "credit history"
+    ],
+    "sign_up_bonus": "None",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Fair (580+)"
+  },
+  {
+    "id": "capital-one-quicksilver",
+    "name": "Capital One Quicksilver",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "rewards": {
+      "everything": "1.5% unlimited cash back",
+      "hotels_rental_cars_travel": "5% via Capital One Travel"
+    },
+    "benefits": [
+      "No annual fee",
+      "No foreign transaction fees",
+      "0% intro APR for 15 months"
+    ],
+    "best_for": [
+      "simplicity",
+      "no annual fee",
+      "international travel",
+      "beginners"
+    ],
+    "sign_up_bonus": "$200 after $500 spend in first 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "capital-one-savor-one",
+    "name": "Capital One SavorOne",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "rewards": {
+      "dining": "3% cash back",
+      "entertainment": "3% cash back",
+      "popular_streaming": "3% cash back",
+      "groceries": "3% cash back (excluding superstores like Walmart/Target)",
+      "capital_one_travel": "5% on hotels and rental cars",
+      "other": "1% cash back"
+    },
+    "benefits": [
+      "No annual fee",
+      "No foreign transaction fees",
+      "0% intro APR for 15 months",
+      "Extended warranty",
+      "Travel accident insurance"
+    ],
+    "best_for": [
+      "dining",
+      "entertainment",
+      "groceries",
+      "streaming",
+      "no annual fee"
+    ],
+    "sign_up_bonus": "$200 after $500 spend in first 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "capital-one-venture",
+    "name": "Capital One Venture Rewards",
+    "issuer": "Capital One",
+    "annual_fee": 95,
+    "rewards": {
+      "capital_one_travel": "5x miles on hotels and rental cars",
+      "everything_else": "2x miles on all purchases"
+    },
+    "benefits": [
+      "Global Entry / TSA PreCheck $100 credit",
+      "No foreign transaction fees",
+      "Transfer to 15+ airline and hotel partners",
+      "Travel accident insurance",
+      "Extended warranty"
+    ],
+    "best_for": [
+      "flat rate travel rewards",
+      "simplicity",
+      "international travel",
+      "travel beginners"
+    ],
+    "sign_up_bonus": "75,000 miles after $4,000 spend in 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good to Excellent (690+)"
+  },
+  {
+    "id": "capital-one-venture-x",
+    "name": "Capital One Venture X",
+    "issuer": "Capital One",
+    "annual_fee": 395,
+    "rewards": {
+      "capital_one_travel": "10x miles on hotels and rental cars, 5x on flights",
+      "other": "2x miles on everything"
+    },
+    "benefits": [
+      "$300 annual travel credit for bookings via Capital One Travel",
+      "10,000 bonus miles every year on card anniversary (~$100 value)",
+      "Priority Pass + Capital One Lounge access (unlimited)",
+      "Global Entry / TSA PreCheck $100 credit",
+      "No foreign transaction fees",
+      "Cell phone protection up to $800",
+      "Trip cancellation/interruption insurance",
+      "Primary rental car insurance"
+    ],
+    "best_for": [
+      "premium travel",
+      "airport lounges",
+      "flat rate travel rewards",
+      "frequent travelers"
+    ],
+    "sign_up_bonus": "75,000 miles after $4,000 spend in 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Excellent (720+)"
+  },
+  {
+    "id": "capital-one-ventureone",
+    "name": "Capital One VentureOne Rewards Credit Card",
+    "issuer": "Capital One",
+    "annual_fee": 0,
+    "rewards": {
+      "hotels_rental_cars_via_capital_one_travel": "5x miles",
+      "everything_else": "1.25x miles"
+    },
+    "benefits": [
+      "No annual fee",
+      "No foreign transaction fees",
+      "Miles never expire",
+      "Transfer miles to 15+ travel partners",
+      "Good entry point into Capital One miles ecosystem"
+    ],
+    "best_for": [
+      "no annual fee travel",
+      "beginners to travel rewards",
+      "flexible miles",
+      "international travel"
+    ],
+    "sign_up_bonus": "20,000 miles after $500 spend in 3 months ($200 value)",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "chase-freedom-flex",
+    "name": "Chase Freedom Flex",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "rewards": {
+      "rotating_categories": "5% cash back (quarterly, up to $1,500: Amazon, gas, groceries, PayPal, etc.)",
+      "dining": "3% cash back",
+      "drugstores": "3% cash back",
+      "chase_travel": "5% cash back",
+      "other": "1% cash back"
+    },
+    "benefits": [
+      "No annual fee",
+      "Cell phone protection up to $800",
+      "Trip cancellation insurance",
+      "Purchase protection"
+    ],
+    "best_for": [
+      "maximizing categories",
+      "dining",
+      "quarterly bonus categories",
+      "Amazon shoppers"
+    ],
+    "sign_up_bonus": "$200 after $500 spend in first 3 months",
+    "foreign_transaction_fee": true,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "chase-freedom-unlimited",
+    "name": "Chase Freedom Unlimited",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "rewards": {
+      "dining": "3% cash back",
+      "drugstores": "3% cash back",
+      "chase_travel": "5% cash back",
+      "other": "1.5% cash back"
+    },
+    "benefits": [
+      "No annual fee",
+      "0% intro APR for 15 months",
+      "Purchase protection up to $500 per claim",
+      "Extended warranty protection"
+    ],
+    "best_for": [
+      "everyday spending",
+      "beginners",
+      "no annual fee",
+      "flat rate cashback",
+      "pairing with Sapphire cards"
+    ],
+    "sign_up_bonus": "$200 after $500 spend in first 3 months",
+    "foreign_transaction_fee": true,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "chase-ink-business-cash",
+    "name": "Chase Ink Business Cash Credit Card",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "rewards": {
+      "office_supplies_internet_cable_phone": "5% cash back (first $25,000/year)",
+      "gas_restaurants": "2% cash back (first $25,000/year)",
+      "other": "1% cash back"
+    },
+    "benefits": [
+      "No annual fee",
+      "Employee cards at no additional cost",
+      "Purchase protection and extended warranty",
+      "No foreign transaction fees",
+      "Points can be transferred to Chase Ultimate Rewards if paired with CSP or CSR"
+    ],
+    "best_for": [
+      "freelancers",
+      "side hustles",
+      "small business owners",
+      "high internet and phone bills"
+    ],
+    "sign_up_bonus": "$350 after $3,000 spend in first 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "chase-ink-business-preferred",
+    "name": "Chase Ink Business Preferred Credit Card",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "rewards": {
+      "travel": "3x points",
+      "shipping": "3x points",
+      "internet_cable_phone": "3x points",
+      "advertising_social_media_search": "3x points (first $150,000/year combined)",
+      "other": "1x point"
+    },
+    "benefits": [
+      "Points worth 25% more via Chase Travel portal",
+      "Transfer to airline and hotel partners at 1:1",
+      "Primary rental car insurance",
+      "Trip cancellation/interruption insurance up to $5,000",
+      "Cell phone protection up to $1,000",
+      "No foreign transaction fees",
+      "Employee cards at no additional cost"
+    ],
+    "best_for": [
+      "small business owners",
+      "freelancers",
+      "high advertising spend",
+      "business travel",
+      "Chase Ultimate Rewards"
+    ],
+    "sign_up_bonus": "90,000 points after $8,000 spend in 3 months ($900 travel value)",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good to Excellent (690+)"
+  },
+  {
+    "id": "chase-ink-business-unlimited",
+    "name": "Chase Ink Business Unlimited Credit Card",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "rewards": {
+      "everything": "1.5% cash back on all purchases"
+    },
+    "benefits": [
+      "No annual fee",
+      "No foreign transaction fees",
+      "Employee cards at no additional cost",
+      "Purchase protection and extended warranty",
+      "Points transferable to Chase Ultimate Rewards partners if paired with CSP or CSR"
+    ],
+    "best_for": [
+      "freelancers",
+      "small business owners",
+      "flat rate business cashback",
+      "simplicity"
+    ],
+    "sign_up_bonus": "$750 after $6,000 spend in first 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "chase-sapphire-preferred",
+    "name": "Chase Sapphire Preferred",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "rewards": {
+      "dining": "3x points",
+      "travel": "2x points",
+      "streaming": "3x points",
+      "online_groceries": "3x points",
+      "other": "1x points"
+    },
+    "benefits": [
+      "$50 annual hotel credit via Chase Travel",
+      "Trip cancellation insurance up to $10,000",
+      "Primary rental car insurance",
+      "No foreign transaction fees",
+      "Transfer to 14 partners: United, Southwest, Hyatt, Marriott, etc.",
+      "DoorDash DashPass membership",
+      "Lyft Pink All Access membership"
+    ],
+    "best_for": [
+      "travel",
+      "dining",
+      "frequent flyers",
+      "hotel stays",
+      "international travel"
+    ],
+    "sign_up_bonus": "60,000 points after $4,000 spend in 3 months (~$750 via Chase Travel)",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good to Excellent (690+)"
+  },
+  {
+    "id": "chase-sapphire-reserve",
+    "name": "Chase Sapphire Reserve",
+    "issuer": "Chase",
+    "annual_fee": 550,
+    "rewards": {
+      "travel": "3x points",
+      "dining": "3x points",
+      "chase_travel": "10x points",
+      "other": "1x points"
+    },
+    "benefits": [
+      "$300 annual travel credit (automatically applied to travel purchases)",
+      "Priority Pass lounge access (1,300+ airport lounges)",
+      "Global Entry / TSA PreCheck $100 credit",
+      "Primary rental car insurance",
+      "Trip cancellation insurance up to $10,000",
+      "No foreign transaction fees",
+      "Transfer to 14 airline and hotel partners",
+      "Complimentary Lyft Pink and DoorDash DashPass",
+      "Chase Sapphire Lounge access"
+    ],
+    "best_for": [
+      "premium travel",
+      "airport lounges",
+      "frequent international travel",
+      "high spenders"
+    ],
+    "sign_up_bonus": "60,000 points after $4,000 spend in 3 months (~$900 via Chase Travel)",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Excellent (720+)"
+  },
+  {
+    "id": "citi-aadvantage-platinum-select",
+    "name": "Citi / AAdvantage Platinum Select World Elite Mastercard",
+    "issuer": "Citi",
+    "annual_fee": 99,
+    "rewards": {
+      "american_airlines": "2x AAdvantage miles",
+      "dining": "2x miles",
+      "gas": "2x miles",
+      "other": "1x mile"
+    },
+    "benefits": [
+      "First checked bag free on American Airlines (saves $35/bag each way)",
+      "Preferred boarding on American flights",
+      "25% savings on in-flight food and beverage",
+      "No foreign transaction fees",
+      "Companion certificate after $30,000 spend per year"
+    ],
+    "best_for": [
+      "American Airlines flyers",
+      "AAdvantage miles",
+      "free checked bags",
+      "domestic and international travel"
+    ],
+    "sign_up_bonus": "50,000 AAdvantage miles after $2,500 spend in 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good to Excellent (690+)"
+  },
+  {
+    "id": "citi-custom-cash",
+    "name": "Citi Custom Cash Card",
+    "issuer": "Citi",
+    "annual_fee": 0,
+    "rewards": {
+      "top_category": "5% cash back on top eligible spend category each billing cycle (up to $500/month)",
+      "other": "1% cash back"
+    },
+    "benefits": [
+      "No annual fee",
+      "Automatically earns 5% on whichever eligible category you spend most in: restaurants, gas, groceries, select travel, select streaming, drugstores, home improvement, fitness clubs, or live entertainment",
+      "0% intro APR for 15 months"
+    ],
+    "best_for": [
+      "simplicity",
+      "one main spending category",
+      "no annual fee",
+      "flexible rewards"
+    ],
+    "sign_up_bonus": "$200 after $1,500 spend in 6 months",
+    "foreign_transaction_fee": true,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "citi-double-cash",
+    "name": "Citi Double Cash Card",
+    "issuer": "Citi",
+    "annual_fee": 0,
+    "rewards": {
+      "everything": "2% cash back (1% when you buy + 1% when you pay)"
+    },
+    "benefits": [
+      "No annual fee",
+      "Simple flat-rate rewards — no categories to track",
+      "0% intro APR for 18 months on balance transfers"
+    ],
+    "best_for": [
+      "simplicity",
+      "everyday spending",
+      "no annual fee",
+      "flat rate rewards"
+    ],
+    "sign_up_bonus": "$200 cash back after $1,500 spend in 6 months",
+    "foreign_transaction_fee": true,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "citi-strata-premier",
+    "name": "Citi Strata Premier Card",
+    "issuer": "Citi",
+    "annual_fee": 95,
+    "rewards": {
+      "hotels": "10x points",
+      "car_rentals": "10x points",
+      "air_travel": "3x points",
+      "dining": "3x points",
+      "groceries": "3x points",
+      "gas": "3x points",
+      "other": "1x points"
+    },
+    "benefits": [
+      "$100 annual hotel savings benefit ($100 off $500+ hotel booking via thankyou.com)",
+      "No foreign transaction fees",
+      "Transfer to 18 airline and hotel partners (Turkish Airlines, Air France, Singapore Airlines, etc.)",
+      "Trip cancellation and interruption protection",
+      "Worldwide car rental insurance"
+    ],
+    "best_for": [
+      "travel",
+      "dining",
+      "groceries",
+      "gas",
+      "hotel bookings",
+      "transfer partners"
+    ],
+    "sign_up_bonus": "70,000 points after $4,000 spend in 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good to Excellent (690+)"
+  },
+  {
+    "id": "costco-anywhere-visa",
+    "name": "Costco Anywhere Visa Card by Citi",
+    "issuer": "Citi",
+    "annual_fee": 0,
+    "rewards": {
+      "gas_ev_charging": "4% cash back (up to $7,000/year)",
+      "restaurants": "3% cash back",
+      "travel": "3% cash back",
+      "costco": "2% cash back",
+      "other": "1% cash back"
+    },
+    "benefits": [
+      "No annual fee (requires Costco membership ~$65-130/yr)",
+      "Best gas rewards of any widely available no-fee card (4%)",
+      "No foreign transaction fees",
+      "Damage and theft purchase protection",
+      "Extended warranty"
+    ],
+    "best_for": [
+      "Costco members",
+      "gas rewards",
+      "high gas spending",
+      "dining",
+      "travel"
+    ],
+    "sign_up_bonus": "None",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Excellent (750+)"
+  },
+  {
+    "id": "amex-delta-gold",
+    "name": "Delta SkyMiles Gold American Express Card",
+    "issuer": "American Express",
+    "annual_fee": 150,
+    "rewards": {
+      "delta_purchases": "2x miles",
+      "dining": "2x miles",
+      "groceries": "2x miles",
+      "other": "1x mile"
+    },
+    "benefits": [
+      "First checked bag free on Delta flights (saves $35/bag each way)",
+      "Priority boarding (Main Cabin 1)",
+      "20% back on in-flight Delta purchases",
+      "$200 Delta flight credit after $10,000 spend per year",
+      "No foreign transaction fees"
+    ],
+    "best_for": [
+      "Delta Airlines flyers",
+      "free checked bags",
+      "travel"
+    ],
+    "sign_up_bonus": "50,000 miles after $2,000 spend in 6 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "discover-it-cash-back",
+    "name": "Discover it Cash Back",
+    "issuer": "Discover",
+    "annual_fee": 0,
+    "rewards": {
+      "rotating_categories": "5% cash back quarterly (Amazon, grocery stores, restaurants, gas, PayPal, etc. — up to $1,500)",
+      "other": "1% cash back"
+    },
+    "benefits": [
+      "No annual fee",
+      "Cashback Match — Discover matches all cash back in your first year",
+      "No foreign transaction fees",
+      "FICO credit score monitoring for free",
+      "Freeze card instantly from app"
+    ],
+    "best_for": [
+      "cashback maximizers",
+      "rotating categories",
+      "Amazon shoppers",
+      "no annual fee"
+    ],
+    "sign_up_bonus": "Cashback Match at end of first year (doubles all cash back earned)",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "discover-it-student",
+    "name": "Discover it Student Cash Back",
+    "issuer": "Discover",
+    "annual_fee": 0,
+    "rewards": {
+      "rotating_categories": "5% cash back quarterly (up to $1,500)",
+      "other": "1% cash back"
+    },
+    "benefits": [
+      "No annual fee",
+      "Cashback Match — doubles all cash back earned in first year",
+      "No credit score required to apply",
+      "$20 statement credit each school year GPA is 3.0+",
+      "No foreign transaction fees"
+    ],
+    "best_for": [
+      "college students",
+      "first credit card",
+      "building credit",
+      "no credit history"
+    ],
+    "sign_up_bonus": "Cashback Match at end of first year",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "No credit history required"
+  },
+  {
+    "id": "hilton-honors-amex",
+    "name": "Hilton Honors American Express Card",
+    "issuer": "American Express",
+    "annual_fee": 0,
+    "rewards": {
+      "hilton_hotels": "7x Hilton Honors points",
+      "restaurants_us": "5x points",
+      "supermarkets_us": "5x points",
+      "gas_us": "5x points",
+      "other": "3x points"
+    },
+    "benefits": [
+      "No annual fee",
+      "Automatic Hilton Silver status",
+      "No foreign transaction fees",
+      "Car rental loss and damage insurance"
+    ],
+    "best_for": [
+      "Hilton hotel stays",
+      "no annual fee hotel card",
+      "entry-level Hilton status",
+      "groceries and dining"
+    ],
+    "sign_up_bonus": "100,000 Hilton Honors points after $2,000 spend in 6 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "hilton-surpass",
+    "name": "Hilton Honors American Express Surpass Card",
+    "issuer": "American Express",
+    "annual_fee": 95,
+    "rewards": {
+      "hilton_hotels": "12x Hilton Honors points",
+      "restaurants": "6x points",
+      "groceries_us": "6x points",
+      "gas_us": "6x points",
+      "other": "3x points"
+    },
+    "benefits": [
+      "Automatic Hilton Gold status (complimentary breakfast at many properties)",
+      "Free Weekend Night Reward after $15,000 spend per year",
+      "10 Priority Pass lounge visits per year",
+      "No foreign transaction fees"
+    ],
+    "best_for": [
+      "Hilton hotel stays",
+      "hotel loyalty",
+      "travel",
+      "complimentary breakfast"
+    ],
+    "sign_up_bonus": "130,000 Hilton Honors points after $3,000 spend in 6 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "ihg-one-rewards-premier",
+    "name": "IHG One Rewards Premier Credit Card",
+    "issuer": "Chase",
+    "annual_fee": 99,
+    "rewards": {
+      "ihg_hotels": "26x total points (10x card + 16x IHG member base)",
+      "travel": "5x points",
+      "dining": "5x points",
+      "gas": "5x points",
+      "other": "3x points"
+    },
+    "benefits": [
+      "Annual Free Night Reward (up to 40,000 points, redeemable at 5,000+ IHG hotels)",
+      "4th night free on award redemptions",
+      "Automatic IHG Platinum Elite status",
+      "$100 Global Entry or TSA PreCheck credit every 4 years",
+      "No foreign transaction fees"
+    ],
+    "best_for": [
+      "IHG hotel stays",
+      "Holiday Inn",
+      "InterContinental",
+      "Kimpton",
+      "free night reward"
+    ],
+    "sign_up_bonus": "140,000 IHG One Rewards points after $3,000 spend in 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good to Excellent (690+)"
+  },
+  {
+    "id": "jetblue-plus",
+    "name": "JetBlue Plus Card",
+    "issuer": "Barclays",
+    "annual_fee": 99,
+    "rewards": {
+      "jetblue_purchases": "6x TrueBlue points",
+      "dining": "2x points",
+      "grocery": "2x points",
+      "other": "1x point"
+    },
+    "benefits": [
+      "5,000 bonus points on each account anniversary",
+      "First checked bag free for cardholder and up to 3 companions",
+      "10% back on JetBlue redemptions",
+      "50% savings on in-flight food and drinks",
+      "Mosaic status with $50,000 spend per year",
+      "No foreign transaction fees"
+    ],
+    "best_for": [
+      "JetBlue flyers",
+      "TrueBlue points",
+      "free checked bags",
+      "Northeast US travel",
+      "Caribbean travel"
+    ],
+    "sign_up_bonus": "60,000 TrueBlue points after $1,000 spend in 90 days",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good to Excellent (690+)"
+  },
+  {
+    "id": "marriott-bonvoy-bold",
+    "name": "Marriott Bonvoy Bold Credit Card",
+    "issuer": "Chase",
+    "annual_fee": 0,
+    "rewards": {
+      "marriott_bonvoy_hotels": "3x Bonvoy points",
+      "dining": "2x points",
+      "other": "1x point"
+    },
+    "benefits": [
+      "No annual fee",
+      "Automatic Silver Elite status (10% bonus points on stays)",
+      "15 Elite Night Credits per year toward status",
+      "No foreign transaction fees"
+    ],
+    "best_for": [
+      "Marriott hotel stays",
+      "entry-level hotel loyalty",
+      "no annual fee",
+      "building hotel status"
+    ],
+    "sign_up_bonus": "30,000 Bonvoy points after $1,000 spend in 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "chase-marriott-bonvoy-boundless",
+    "name": "Marriott Bonvoy Boundless",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "rewards": {
+      "marriott_hotels": "6x points",
+      "gas_groceries_dining": "3x points",
+      "other": "2x points"
+    },
+    "benefits": [
+      "Free Night Award every year (up to 35,000 points, worth $150-300+)",
+      "15 Elite Night Credits per year toward status",
+      "Silver Elite status automatically",
+      "No foreign transaction fees",
+      "Marriott Bonvoy Silver status perks"
+    ],
+    "best_for": [
+      "Marriott hotel stays",
+      "hotel loyalty",
+      "free night awards"
+    ],
+    "sign_up_bonus": "3 free night awards (up to 50,000 points each) after $3,000 spend in 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good to Excellent (690+)"
+  },
+  {
+    "id": "marriott-bonvoy-brilliant",
+    "name": "Marriott Bonvoy Brilliant American Express Card",
+    "issuer": "American Express",
+    "annual_fee": 650,
+    "rewards": {
+      "marriott_bonvoy_hotels": "6x Bonvoy points",
+      "dining_worldwide": "3x points",
+      "flights_direct": "3x points",
+      "other": "2x points"
+    },
+    "benefits": [
+      "$300 annual Marriott Bonvoy statement credit",
+      "Annual Free Night Award (up to 85,000 points)",
+      "Automatic Platinum Elite status (lounge access, suite upgrades, complimentary breakfast)",
+      "Priority Pass Select lounge access",
+      "$100 Global Entry or TSA PreCheck credit",
+      "25 Elite Night Credits per year",
+      "No foreign transaction fees"
+    ],
+    "best_for": [
+      "frequent Marriott guests",
+      "luxury hotel stays",
+      "Platinum Elite status",
+      "premium travel"
+    ],
+    "sign_up_bonus": "185,000 Bonvoy points after $6,000 spend in 6 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Excellent (720+)"
+  },
+  {
+    "id": "petal-2",
+    "name": "Petal 2 Visa Credit Card",
+    "issuer": "WebBank / Petal",
+    "annual_fee": 0,
+    "rewards": {
+      "select_merchants": "2-10% cash back at select merchants",
+      "everything_else": "1.5% after 12 on-time payments (starts at 1%)"
+    },
+    "benefits": [
+      "No annual fee, no fees of any kind (no late fee, no foreign transaction fee)",
+      "No credit history required — uses bank account data for eligibility",
+      "Rewards grow to 1.5% after 12 on-time payments",
+      "Free credit monitoring"
+    ],
+    "best_for": [
+      "no credit history",
+      "building credit",
+      "recent immigrants",
+      "first credit card",
+      "students"
+    ],
+    "sign_up_bonus": "None",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "No credit history required"
+  },
+  {
+    "id": "sofi-credit-card",
+    "name": "SoFi Credit Card",
+    "issuer": "SoFi / The Bank of Missouri",
+    "annual_fee": 0,
+    "rewards": {
+      "everything": "2% unlimited cash back when redeemed into SoFi account"
+    },
+    "benefits": [
+      "No annual fee",
+      "No foreign transaction fees",
+      "Cell phone protection up to $1,000",
+      "Boost rewards to 3% for first year if you have a SoFi personal loan",
+      "0% intro APR for 12 months",
+      "Auto rental collision waiver"
+    ],
+    "best_for": [
+      "SoFi customers",
+      "simplicity",
+      "flat rate 2% cashback",
+      "no annual fee"
+    ],
+    "sign_up_bonus": "$200 after $1,000 spend in first 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "southwest-rapid-rewards-plus",
+    "name": "Southwest Rapid Rewards Plus Credit Card",
+    "issuer": "Chase",
+    "annual_fee": 69,
+    "rewards": {
+      "southwest_purchases": "2x Rapid Rewards points",
+      "dining": "3x points",
+      "streaming": "3x points",
+      "hotel_and_car_partners": "2x points",
+      "local_transit": "2x points",
+      "other": "1x point"
+    },
+    "benefits": [
+      "3,000 anniversary bonus points each year",
+      "2 EarlyBird Check-In passes per year",
+      "No blackout dates on Southwest flights",
+      "Bags fly free on Southwest",
+      "No foreign transaction fees",
+      "Earns toward Companion Pass (most valuable domestic travel benefit)"
+    ],
+    "best_for": [
+      "Southwest Airlines flyers",
+      "domestic travel",
+      "Companion Pass",
+      "budget travelers"
+    ],
+    "sign_up_bonus": "50,000 points after $1,000 spend in 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "us-bank-cash-plus",
+    "name": "U.S. Bank Cash+ Visa Signature",
+    "issuer": "U.S. Bank",
+    "annual_fee": 0,
+    "rewards": {
+      "two_chosen_categories": "5% cash back on first $2,000 combined per quarter (fast food, home utilities, ground transport, TV/internet/streaming, cell phones, electronics, gyms, sporting goods, furniture, department stores, or movie theaters)",
+      "one_everyday_category": "2% cash back (grocery stores, restaurants, or gas stations)",
+      "other": "1% cash back"
+    },
+    "benefits": [
+      "No annual fee",
+      "Highest category-specific rewards available (5% on utilities, streaming, cell phone bills)",
+      "0% intro APR for 15 months"
+    ],
+    "best_for": [
+      "utilities",
+      "streaming bills",
+      "cell phone plans",
+      "fast food",
+      "category maximizers"
+    ],
+    "sign_up_bonus": "$200 after $1,000 spend in 120 days",
+    "foreign_transaction_fee": true,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "chase-united-explorer",
+    "name": "United Explorer Card",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "rewards": {
+      "united_purchases": "2x miles",
+      "dining": "2x miles",
+      "hotel_stays": "2x miles",
+      "other": "1x mile"
+    },
+    "benefits": [
+      "First checked bag free on United flights (saves $35/bag each way)",
+      "2 United Club one-time passes per year",
+      "25% back on United in-flight purchases",
+      "Priority boarding",
+      "No foreign transaction fees",
+      "Trip cancellation/interruption insurance",
+      "Primary rental car insurance"
+    ],
+    "best_for": [
+      "United Airlines flyers",
+      "travel",
+      "free checked bags"
+    ],
+    "sign_up_bonus": "50,000 miles after $3,000 spend in 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good to Excellent (690+)"
+  },
+  {
+    "id": "wells-fargo-active-cash",
+    "name": "Wells Fargo Active Cash Card",
+    "issuer": "Wells Fargo",
+    "annual_fee": 0,
+    "rewards": {
+      "everything": "2% unlimited cash rewards on purchases"
+    },
+    "benefits": [
+      "No annual fee",
+      "0% intro APR for 15 months",
+      "$600 cell phone protection",
+      "Visa Signature concierge service",
+      "Access to Visa Signature hotel benefits"
+    ],
+    "best_for": [
+      "simplicity",
+      "flat rate 2% cashback",
+      "no annual fee",
+      "everyday spending"
+    ],
+    "sign_up_bonus": "$200 after $500 spend in first 3 months",
+    "foreign_transaction_fee": true,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "wells-fargo-autograph",
+    "name": "Wells Fargo Autograph Card",
+    "issuer": "Wells Fargo",
+    "annual_fee": 0,
+    "rewards": {
+      "restaurants": "3x points",
+      "travel": "3x points",
+      "gas_ev_charging": "3x points",
+      "transit": "3x points",
+      "popular_streaming": "3x points",
+      "phone_plans": "3x points",
+      "other": "1x points"
+    },
+    "benefits": [
+      "No annual fee",
+      "No foreign transaction fees",
+      "0% intro APR for 12 months",
+      "$600 cell phone protection",
+      "Auto rental collision waiver"
+    ],
+    "best_for": [
+      "dining",
+      "travel",
+      "gas",
+      "streaming",
+      "no annual fee",
+      "no foreign fees"
+    ],
+    "sign_up_bonus": "20,000 points after $1,000 spend in 3 months ($200 value)",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  },
+  {
+    "id": "world-of-hyatt",
+    "name": "World of Hyatt Credit Card",
+    "issuer": "Chase",
+    "annual_fee": 95,
+    "rewards": {
+      "hyatt_hotels": "9x total points (4x card + 5x base)",
+      "dining": "2x points",
+      "airline_tickets": "2x points",
+      "local_transit_commuting": "2x points",
+      "gym_fitness": "2x points",
+      "other": "1x point"
+    },
+    "benefits": [
+      "Free night at any Category 1-4 Hyatt hotel every year",
+      "Automatic Discoverist status",
+      "5 qualifying night credits toward Explorist annually",
+      "No foreign transaction fees",
+      "Trip cancellation/interruption insurance"
+    ],
+    "best_for": [
+      "Hyatt hotel stays",
+      "hotel loyalty",
+      "best hotel points value",
+      "travel"
+    ],
+    "sign_up_bonus": "30,000 Hyatt points after $3,000 spend in 3 months",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good to Excellent (690+)"
+  },
+  {
+    "id": "wyndham-rewards-earner-plus",
+    "name": "Wyndham Rewards Earner Plus Card",
+    "issuer": "Barclays",
+    "annual_fee": 75,
+    "rewards": {
+      "wyndham_hotels_gas": "6x Wyndham Rewards points",
+      "dining_grocery": "4x points",
+      "other": "1x point"
+    },
+    "benefits": [
+      "7,500 bonus points on each account anniversary",
+      "Automatic Wyndham Gold status",
+      "$0 foreign transaction fees",
+      "Good for Days Inn, La Quinta, Ramada, Super 8, Travelodge, and more"
+    ],
+    "best_for": [
+      "Wyndham hotel stays",
+      "La Quinta",
+      "Days Inn",
+      "budget hotel loyalty",
+      "gas rewards"
+    ],
+    "sign_up_bonus": "45,000 Wyndham Rewards points after $1,000 spend in 90 days",
+    "foreign_transaction_fee": false,
+    "credit_score_needed": "Good (670+)"
+  }
+]

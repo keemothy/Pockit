@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "openai": "^4.104.0",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.111.0",
     "lucide-react": "^1.27.0",
