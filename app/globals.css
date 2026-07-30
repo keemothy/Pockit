@@ -133,3 +133,16 @@ body {
 .card-accent-amber::before { content:''; position:absolute; inset-inline:0; top:0; height:3px; border-radius:20px 20px 0 0; background:linear-gradient(90deg,#f59e0b,#fbbf24); }
 .card-accent-violet::before{ content:''; position:absolute; inset-inline:0; top:0; height:3px; border-radius:20px 20px 0 0; background:linear-gradient(90deg,#7c3aed,#a855f7); }
 .card-accent-emerald::before{ content:''; position:absolute; inset-inline:0; top:0; height:3px; border-radius:20px 20px 0 0; background:linear-gradient(90deg,#059669,#34d399); }
+
+/* ── Analytics in-page insight navigation ─────────────── */
+@keyframes analytics-insight-highlight {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(40, 120, 240, 0); }
+  25%, 65% { box-shadow: 0 0 0 4px rgba(40, 120, 240, 0.24), 0 0 28px rgba(40, 120, 240, 0.28); }
+}
+.analytics-scroll-target:target,
+.analytics-scroll-target.is-highlighted {
+  animation: analytics-insight-highlight 1.7s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .analytics-scroll-target:target { animation: none; box-shadow: 0 0 0 3px rgba(40, 120, 240, 0.24); }
+}
