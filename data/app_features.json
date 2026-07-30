@@ -1,0 +1,37 @@
+[
+  {
+    "id": "wallet",
+    "name": "Wallet",
+    "description": "Add and manage all your credit cards in one place. View each card's rewards, benefits, and spending limits.",
+    "route": "/wallet",
+    "keywords": ["add card", "my cards", "manage cards", "card list", "view cards", "wallet"]
+  },
+  {
+    "id": "analytics",
+    "name": "Analytics",
+    "description": "Track all your transactions by category. See where your money is going across all your cards with spending charts and breakdowns.",
+    "route": "/analytics",
+    "keywords": ["spending", "transactions", "budget", "track money", "expenses", "analytics", "where did my money go"]
+  },
+  {
+    "id": "subscriptions",
+    "name": "Subscriptions",
+    "description": "See all your recurring subscriptions and monthly charges in one place. Never get surprised by a forgotten subscription again.",
+    "route": "/subscriptions",
+    "keywords": ["subscriptions", "recurring", "Netflix", "Spotify", "Amazon Prime", "monthly charges", "cancel subscription", "renewal"]
+  },
+  {
+    "id": "dashboard",
+    "name": "Dashboard",
+    "description": "Your financial overview: total balance, recent transactions, subscription spending, and spending charts at a glance.",
+    "route": "/",
+    "keywords": ["home", "dashboard", "overview", "summary", "spending overview"]
+  },
+  {
+    "id": "settings",
+    "name": "Settings",
+    "description": "Manage your account settings, notifications, and app preferences.",
+    "route": "/settings",
+    "keywords": ["settings", "account", "profile", "preferences", "notifications"]
+  }
+]
