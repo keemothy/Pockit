@@ -62,7 +62,7 @@ body {
     #22d3ee 270deg,
     #1F78FF 360deg
   );
-  animation: spin-gradient 6s linear infinite;
+  animation: spin-gradient 12s linear infinite;
 }
 
 /* ── Animated gradient text ────────────────────────────── */
