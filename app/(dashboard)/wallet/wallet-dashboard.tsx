@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, ChevronDown, ChevronUp, Landmark, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { getRewardRulesForCard } from '@/lib/rewards/reward-rules';
@@ -129,6 +129,37 @@ function Donut({ card }: { card: WalletCard }) {
       <div className="grid h-16 w-16 place-items-center rounded-full bg-white text-center shadow-inner">
         <strong className="text-sm">{money.format(monthlyTotal)}</strong>
       </div>
+    </div>
+  );
+}
+
+function CardTilt({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [style, setStyle] = useState<React.CSSProperties>({});
+
+  return (
+    <div
+      ref={ref}
+      className="w-fit"
+      onMouseMove={(e) => {
+        const rect = ref.current?.getBoundingClientRect();
+        if (!rect) return;
+        const px = (e.clientX - rect.left) / rect.width - 0.5;
+        const py = (e.clientY - rect.top) / rect.height - 0.5;
+        setStyle({
+          transform: `perspective(600px) rotateX(${py * -12}deg) rotateY(${px * 12}deg) scale3d(1.04,1.04,1.04)`,
+          transition: 'transform 0.08s linear',
+        });
+      }}
+      onMouseLeave={() =>
+        setStyle({
+          transform: 'perspective(600px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)',
+          transition: 'transform 0.5s cubic-bezier(0.23,1,0.32,1)',
+        })
+      }
+      style={style}
+    >
+      {children}
     </div>
   );
 }
@@ -356,7 +387,7 @@ export default function WalletDashboard({ initialCards, cardholderName, spending
                     </button>
                   </div>
                   <div className="mt-3 grid gap-4 xl:grid-cols-[260px_minmax(360px,0.8fr)_minmax(300px,0.55fr)] xl:items-start">
-                    <div><CreditCardVisual card={card} /><div className="mt-3 w-[240px]"><div className="h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2784c6]" style={{ width: `${usage}%` }} /></div><div className="mt-1.5 flex items-center justify-between gap-2 whitespace-nowrap text-[10px]"><span>Credit usage (cycle)</span><span>{money.format(card.currentBalance)} / {money.format(card.limit)}</span></div></div></div>
+                    <div><CardTilt><CreditCardVisual card={card} /></CardTilt><div className="mt-3 w-[240px]"><div className="h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#2784c6]" style={{ width: `${usage}%` }} /></div><div className="mt-1.5 flex items-center justify-between gap-2 whitespace-nowrap text-[10px]"><span>Credit usage (cycle)</span><span>{money.format(card.currentBalance)} / {money.format(card.limit)}</span></div></div></div>
                     <div className="border-y border-slate-200 py-3 xl:border-x xl:border-y-0 xl:px-5">
                       <div className="grid gap-3 sm:grid-cols-[104px_1fr] sm:items-start"><div className="flex flex-col items-center"><p className="mb-2 w-[104px] text-center text-[10px] font-semibold uppercase tracking-wide text-slate-400">{spendingPeriodLabel} usage</p><Donut card={card} /></div><div className="space-y-1.5">{card.hasSpendingData ? card.categories.map((category) => <div key={category.label} className="rounded-lg bg-slate-50 px-2 py-1.5 text-xs"><span className="mr-1.5 inline-block h-2 w-2 rounded-full" style={{ backgroundColor: category.color }} />{category.label} - {money.format(category.amount)}</div>) : <p className="text-xs text-slate-500">No categorized spending yet. Refresh a Transactions-enabled Sandbox account to populate this chart.</p>}</div></div>
                     </div>
