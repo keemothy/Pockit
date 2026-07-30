@@ -11,6 +11,8 @@ export default function AuthForm() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [requiresTwoFactor, setRequiresTwoFactor] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -33,8 +35,45 @@ export default function AuthForm() {
       return;
     }
 
+    if (!isSignUp) {
+      const { data: assurance, error: assuranceError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (assuranceError) {
+        setMessage(assuranceError.message);
+        return;
+      }
+      if (assurance.currentLevel === "aal1" && assurance.nextLevel === "aal2") {
+        setRequiresTwoFactor(true);
+        setMessage(null);
+        return;
+      }
+    }
+
     // Pockit sign-in always opens the dashboard. Plaid Link is only opened
     // later when the user chooses "Connect bank" from the Wallet page.
+    router.replace("/");
+    router.refresh();
+  }
+
+  async function verifyTwoFactor(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage(null);
+    setIsSubmitting(true);
+    const supabase = createClient();
+    const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors();
+    const factor = factors?.totp.find((item) => item.status === "verified");
+    if (factorsError || !factor) {
+      setIsSubmitting(false);
+      setMessage(factorsError?.message ?? "No verified authenticator was found for this account.");
+      return;
+    }
+
+    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code: verificationCode.trim() });
+    setIsSubmitting(false);
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
     router.replace("/");
     router.refresh();
   }
@@ -46,6 +85,19 @@ export default function AuthForm() {
         <h1 className="mt-1 text-2xl font-semibold text-slate-900">{isSignUp ? "Create your account" : "Welcome back"}</h1>
         <p className="mt-2 text-sm text-slate-600">{isSignUp ? "Start managing your money in one place." : "Sign in to view your Pockit dashboard."}</p>
 
+        {requiresTwoFactor ? (
+          <form className="mt-6 space-y-4" onSubmit={verifyTwoFactor}>
+            <label className="block text-sm font-medium text-slate-700">
+              Authenticator code
+              <input className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" value={verificationCode} onChange={(event) => setVerificationCode(event.target.value.replace(/\D/g, "").slice(0, 6))} required autoFocus />
+            </label>
+            <p className="text-sm text-slate-600">Enter the six-digit code from your authenticator app.</p>
+            {message && <p role="status" className="rounded-lg bg-slate-100 p-3 text-sm text-slate-700">{message}</p>}
+            <button type="submit" disabled={isSubmitting} className="w-full cursor-pointer rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:bg-slate-300">
+              {isSubmitting ? "Verifying…" : "Verify and sign in"}
+            </button>
+          </form>
+        ) : (
         <form className="mt-6 space-y-4" onSubmit={submit}>
           <label className="block text-sm font-medium text-slate-700">
             Email
@@ -60,9 +112,10 @@ export default function AuthForm() {
             {isSubmitting ? "Please wait…" : isSignUp ? "Create account" : "Sign in"}
           </button>
         </form>
-        <button type="button" onClick={() => { setIsSignUp((value) => !value); setMessage(null); }} className="mt-5 text-sm font-medium text-blue-600 hover:text-blue-700 cursor-pointer">
+        )}
+        {!requiresTwoFactor && <button type="button" onClick={() => { setIsSignUp((value) => !value); setMessage(null); }} className="mt-5 text-sm font-medium text-blue-600 hover:text-blue-700 cursor-pointer">
           {isSignUp ? "Already have an account? Sign in" : "Need an account? Create one"}
-        </button>
+        </button>}
       </section>
     </main>
   );
