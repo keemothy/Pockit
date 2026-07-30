@@ -47,6 +47,27 @@ Pockit uses Supabase for email/password accounts and for persisting connected Pl
 
 After configuration, users create an account at `/auth/login`, sign in, and connect their bank at `/auth/connect-bank`. The server encrypts each Plaid access token before saving it; only safe account details are sent to the browser.
 
+## Credit-card catalog and reward rules
+
+`GET /api/cards/catalog` provides active card metadata and sign-up-bonus offers from the public [credit-card-bonuses-api](https://github.com/andenacitelli/credit-card-bonuses-api) JSON feed. The feed is a daily-synced, read-only mirror and is licensed under MIT with Commons Clause; it is used here for this non-commercial course project and is not a source of category-by-category reward multipliers.
+
+Category reward rules are deliberately separate in [`data/reward-rules.json`](data/reward-rules.json). When adding a rule, cite the issuer's official card page and record a `verifiedAt` date. Each rule should follow this structure:
+
+```json
+{
+  "cardId": "catalog-card-id",
+  "category": "dining",
+  "multiplier": 3,
+  "rewardCurrency": "CHASE_ULTIMATE_REWARDS",
+  "sourceName": "Chase Sapphire Preferred official card page",
+  "sourceUrl": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred",
+  "verifiedAt": "2026-07-29",
+  "notes": "Estimate only; merchant classification and issuer terms apply."
+}
+```
+
+The app should label calculated rewards as estimates. Plaid supplies transaction amounts and categories, while the issuer remains the source of truth for final reward eligibility and totals.
+
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Deploy on Vercel
