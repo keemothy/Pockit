@@ -122,19 +122,14 @@ function CreditCard({ card, index }: { card: typeof CARDS[number]; index: number
         ...card.pos,
       }}
     >
-      {/* Sheen overlay */}
       <div className="absolute inset-0" style={{ background: card.sheen }} />
-
       <div className={`relative h-full flex flex-col justify-between p-4 ${isDark ? "text-zinc-800" : "text-white"}`}>
-        {/* Top row */}
         <div className="flex items-start justify-between">
           <span className={`text-[10px] font-semibold tracking-widest ${isDark ? "text-zinc-500" : "text-white/50"}`}>
             {card.name}
           </span>
           <NetworkBadge network={card.network} dark={isDark} />
         </div>
-
-        {/* Chip */}
         <div className="flex items-center gap-2.5">
           <div
             className="relative h-7 w-9 rounded overflow-hidden"
@@ -152,13 +147,8 @@ function CreditCard({ card, index }: { card: typeof CARDS[number]; index: number
               }}
             />
           </div>
-          {/* Contactless */}
-          <span className={`text-base leading-none ${isDark ? "text-zinc-400" : "text-white/40"}`}>
-            )))
-          </span>
+          <span className={`text-base leading-none ${isDark ? "text-zinc-400" : "text-white/40"}`}>)))</span>
         </div>
-
-        {/* Bottom */}
         <div>
           <p className={`font-mono text-[11px] tracking-[0.15em] ${isDark ? "text-zinc-600" : "text-white/70"}`}>
             {card.number}
@@ -173,7 +163,6 @@ function CreditCard({ card, index }: { card: typeof CARDS[number]; index: number
   );
 }
 
-/* ── Stats ─────────────────────────────────────────────── */
 const STATS = [
   { value: "48", label: "credit cards" },
   { value: "26", label: "subscriptions" },
@@ -185,12 +174,14 @@ export default function AuthForm() {
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
-  const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [requiresTwoFactor, setRequiresTwoFactor] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -222,6 +213,47 @@ export default function AuthForm() {
       return;
     }
 
+    if (!isSignUp) {
+      const { data: assurance, error: assuranceError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (assuranceError) {
+        setMessage(assuranceError.message);
+        setIsError(true);
+        return;
+      }
+      if (assurance.currentLevel === "aal1" && assurance.nextLevel === "aal2") {
+        setRequiresTwoFactor(true);
+        setMessage(null);
+        return;
+      }
+    }
+
+    router.replace("/");
+    router.refresh();
+  }
+
+  async function verifyTwoFactor(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage(null);
+    setIsSubmitting(true);
+    const supabase = createClient();
+    const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors();
+    const factor = factors?.totp.find((item) => item.status === "verified");
+    if (factorsError || !factor) {
+      setIsSubmitting(false);
+      setMessage(factorsError?.message ?? "No verified authenticator was found for this account.");
+      setIsError(true);
+      return;
+    }
+    const { error } = await supabase.auth.mfa.challengeAndVerify({
+      factorId: factor.id,
+      code: verificationCode.trim(),
+    });
+    setIsSubmitting(false);
+    if (error) {
+      setMessage(error.message);
+      setIsError(true);
+      return;
+    }
     router.replace("/");
     router.refresh();
   }
@@ -234,28 +266,20 @@ export default function AuthForm() {
 
       {/* ── Left panel — card scatter background ── */}
       <div className="noise-bg relative hidden overflow-hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-between lg:px-12 lg:py-14">
-
-        {/* Deep dark base */}
         <div className="absolute inset-0 bg-[#060d1f]" />
-
-        {/* Scattered credit cards */}
         {CARDS.map((card, i) => (
           <CreditCard key={i} card={card} index={i} />
         ))}
-
-        {/* Color bloom overlays — give the cards atmosphere */}
         <div className="pointer-events-none absolute inset-0"
           style={{ background: "radial-gradient(ellipse at 30% 60%, rgba(31,120,255,0.18) 0%, transparent 55%)" }} />
         <div className="pointer-events-none absolute inset-0"
           style={{ background: "radial-gradient(ellipse at 70% 20%, rgba(168,85,247,0.14) 0%, transparent 50%)" }} />
         <div className="pointer-events-none absolute inset-0"
           style={{ background: "radial-gradient(ellipse at 50% 90%, rgba(236,72,153,0.10) 0%, transparent 50%)" }} />
-
-        {/* Strong dark vignette — cards recede, text comes forward */}
         <div className="pointer-events-none absolute inset-0"
           style={{ background: "linear-gradient(to bottom, rgba(4,9,22,0.92) 0%, rgba(4,9,22,0.30) 28%, rgba(4,9,22,0.30) 62%, rgba(4,9,22,0.94) 100%)" }} />
 
-        {/* 1 — Logo (top) */}
+        {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -269,7 +293,7 @@ export default function AuthForm() {
           <span className="text-lg font-semibold text-white/80 tracking-tight">Pockit</span>
         </motion.div>
 
-        {/* 2 — Headline + tagline (middle) */}
+        {/* Headline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -288,7 +312,7 @@ export default function AuthForm() {
           </p>
         </motion.div>
 
-        {/* 3 — Stats (bottom) */}
+        {/* Stats */}
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -333,117 +357,181 @@ export default function AuthForm() {
                 WebkitBackdropFilter: "blur(40px)",
               }}
             >
-              <h2 className="text-[22px] font-bold text-white">
-                {isSignUp ? "Create account" : "Welcome back"}
-              </h2>
-              <p className="mt-1.5 text-sm text-white/35">
-                {isSignUp ? "Start managing your money smarter." : "Sign in to your Pockit dashboard."}
-              </p>
-
-              <form className="mt-6 space-y-4" onSubmit={submit}>
-                {isSignUp && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    transition={{ duration: 0.22 }}
-                  >
+              {requiresTwoFactor ? (
+                /* ── 2FA challenge screen ── */
+                <>
+                  <h2 className="text-[22px] font-bold text-white">Two-factor check</h2>
+                  <p className="mt-1.5 text-sm text-white/35">
+                    Enter the 6-digit code from your authenticator app.
+                  </p>
+                  <form className="mt-6 space-y-4" onSubmit={verifyTwoFactor}>
                     <label className="block">
-                      <span className="text-xs font-medium text-white/40">Full name</span>
+                      <span className="text-xs font-medium text-white/40">Verification code</span>
                       <input
-                        className={`mt-1.5 ${inputCls}`}
-                        type="text"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
+                        className={`mt-1.5 ${inputCls} tracking-[0.25em] text-center text-lg`}
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        pattern="[0-9]{6}"
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                         required
-                        autoComplete="name"
-                        placeholder="Your full name"
+                        autoFocus
+                        placeholder="000000"
                       />
                     </label>
-                  </motion.div>
-                )}
-
-                <label className="block">
-                  <span className="text-xs font-medium text-white/40">Email</span>
-                  <input
-                    className={`mt-1.5 ${inputCls}`}
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    autoComplete="email"
-                    placeholder="you@example.com"
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="text-xs font-medium text-white/40">Password</span>
-                  <div className="relative mt-1.5">
-                    <input
-                      className={`${inputCls} pr-11`}
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                      autoComplete={isSignUp ? "new-password" : "current-password"}
-                      placeholder="••••••••"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/20 transition-colors hover:text-white/50"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    {message && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        role="status"
+                        className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300"
+                      >
+                        {message}
+                      </motion.p>
+                    )}
+                    <motion.button
+                      type="submit"
+                      disabled={isSubmitting}
+                      whileHover={{ scale: 1.012 }}
+                      whileTap={{ scale: 0.975 }}
+                      className="mt-2 w-full rounded-xl py-3 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
+                      style={{
+                        background: "linear-gradient(135deg, #1F78FF 0%, #a855f7 55%, #ec4899 100%)",
+                        boxShadow: "0 4px 28px rgba(31,120,255,0.28)",
+                      }}
                     >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </label>
-
-                {message && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    role="status"
-                    className={`rounded-xl border px-4 py-3 text-sm ${
-                      isError
-                        ? "border-red-500/20 bg-red-500/10 text-red-300"
-                        : "border-white/8 bg-white/[0.05] text-white/55"
-                    }`}
+                      {isSubmitting ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          Verifying…
+                        </span>
+                      ) : "Verify and sign in"}
+                    </motion.button>
+                  </form>
+                  <button
+                    type="button"
+                    onClick={() => { setRequiresTwoFactor(false); setMessage(null); setVerificationCode(""); }}
+                    className="mt-5 w-full text-center text-sm text-white/25 transition-colors hover:text-white/50"
                   >
-                    {message}
-                  </motion.p>
-                )}
+                    Back to sign in
+                  </button>
+                </>
+              ) : (
+                /* ── Normal sign in / sign up ── */
+                <>
+                  <h2 className="text-[22px] font-bold text-white">
+                    {isSignUp ? "Create account" : "Welcome back"}
+                  </h2>
+                  <p className="mt-1.5 text-sm text-white/35">
+                    {isSignUp ? "Start managing your money smarter." : "Sign in to your Pockit dashboard."}
+                  </p>
 
-                <motion.button
-                  type="submit"
-                  disabled={isSubmitting}
-                  whileHover={{ scale: 1.012 }}
-                  whileTap={{ scale: 0.975 }}
-                  className="mt-2 w-full rounded-xl py-3 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
-                  style={{
-                    background: "linear-gradient(135deg, #1F78FF 0%, #a855f7 55%, #ec4899 100%)",
-                    boxShadow: "0 4px 28px rgba(31,120,255,0.28)",
-                  }}
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      Please wait…
+                  <form className="mt-6 space-y-4" onSubmit={submit}>
+                    {isSignUp && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        transition={{ duration: 0.22 }}
+                      >
+                        <label className="block">
+                          <span className="text-xs font-medium text-white/40">Full name</span>
+                          <input
+                            className={`mt-1.5 ${inputCls}`}
+                            type="text"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            required
+                            autoComplete="name"
+                            placeholder="Your full name"
+                          />
+                        </label>
+                      </motion.div>
+                    )}
+
+                    <label className="block">
+                      <span className="text-xs font-medium text-white/40">Email</span>
+                      <input
+                        className={`mt-1.5 ${inputCls}`}
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        autoComplete="email"
+                        placeholder="you@example.com"
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="text-xs font-medium text-white/40">Password</span>
+                      <div className="relative mt-1.5">
+                        <input
+                          className={`${inputCls} pr-11`}
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          minLength={6}
+                          autoComplete={isSignUp ? "new-password" : "current-password"}
+                          placeholder="••••••••"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/20 transition-colors hover:text-white/50"
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                    </label>
+
+                    {message && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        role="status"
+                        className={`rounded-xl border px-4 py-3 text-sm ${
+                          isError
+                            ? "border-red-500/20 bg-red-500/10 text-red-300"
+                            : "border-white/8 bg-white/[0.05] text-white/55"
+                        }`}
+                      >
+                        {message}
+                      </motion.p>
+                    )}
+
+                    <motion.button
+                      type="submit"
+                      disabled={isSubmitting}
+                      whileHover={{ scale: 1.012 }}
+                      whileTap={{ scale: 0.975 }}
+                      className="mt-2 w-full rounded-xl py-3 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
+                      style={{
+                        background: "linear-gradient(135deg, #1F78FF 0%, #a855f7 55%, #ec4899 100%)",
+                        boxShadow: "0 4px 28px rgba(31,120,255,0.28)",
+                      }}
+                    >
+                      {isSubmitting ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          Please wait…
+                        </span>
+                      ) : isSignUp ? "Create account" : "Sign in"}
+                    </motion.button>
+                  </form>
+
+                  <button
+                    type="button"
+                    onClick={() => { setIsSignUp((v) => !v); setMessage(null); }}
+                    className="mt-5 w-full text-center text-sm text-white/25 transition-colors hover:text-white/50"
+                  >
+                    {isSignUp ? "Already have an account? " : "Don't have an account? "}
+                    <span className="font-semibold text-[#57BEFE]">
+                      {isSignUp ? "Sign in" : "Create one"}
                     </span>
-                  ) : isSignUp ? "Create account" : "Sign in"}
-                </motion.button>
-              </form>
-
-              <button
-                type="button"
-                onClick={() => { setIsSignUp((v) => !v); setMessage(null); }}
-                className="mt-5 w-full text-center text-sm text-white/25 transition-colors hover:text-white/50"
-              >
-                {isSignUp ? "Already have an account? " : "Don't have an account? "}
-                <span className="font-semibold text-[#57BEFE]">
-                  {isSignUp ? "Sign in" : "Create one"}
-                </span>
-              </button>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </motion.div>
