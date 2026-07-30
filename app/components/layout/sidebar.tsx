@@ -32,9 +32,10 @@ const links = [
 ];
 
 export default function Sidebar() {
-  // Set the sidebar to open by default.
+  
+   // set default sidebar to open
   const [isOpen, setIsOpen] = useState(true);
-
+  
   const pathname = usePathname();
   const router = useRouter();
 
@@ -56,9 +57,9 @@ export default function Sidebar() {
         <Image
           src="/pockit_logo.png"
           alt="Pockit"
-          width={418}
-          height={464}
-          className="h-auto w-16 shrink-0 rounded-lg"
+          width={64}
+          height={64}
+          className="shrink-0 rounded-lg"
         />
         {isOpen && <span className="truncate text-4xl font-semibold text-[#57befe]">Pockit</span>}
       </div>

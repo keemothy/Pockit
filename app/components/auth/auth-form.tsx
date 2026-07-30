@@ -8,7 +8,6 @@ export default function AuthForm() {
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
-  const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,14 +19,7 @@ export default function AuthForm() {
     const supabase = createClient();
 
     const result = isSignUp
-      ? await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: fullName.trim() },
-          emailRedirectTo: window.location.origin,
-        },
-      })
+      ? await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } })
       : await supabase.auth.signInWithPassword({ email, password });
 
     setIsSubmitting(false);
@@ -55,10 +47,6 @@ export default function AuthForm() {
         <p className="mt-2 text-sm text-slate-600">{isSignUp ? "Start managing your money in one place." : "Sign in to view your Pockit dashboard."}</p>
 
         <form className="mt-6 space-y-4" onSubmit={submit}>
-          {isSignUp && <label className="block text-sm font-medium text-slate-700">
-            Full name
-            <input className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900" type="text" value={fullName} onChange={(event) => setFullName(event.target.value)} required autoComplete="name" />
-          </label>}
           <label className="block text-sm font-medium text-slate-700">
             Email
             <input className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" />
