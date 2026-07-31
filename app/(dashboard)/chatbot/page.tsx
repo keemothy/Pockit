@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import type { ChatMessage, ChatResponse } from "@/lib/chatbot-context";
 
 interface DisplayMessage {
@@ -25,11 +26,13 @@ const WELCOME: DisplayMessage = {
 };
 
 export default function ChatbotPage() {
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<DisplayMessage[]>([WELCOME]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const handledQueryRef = useRef<string | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -88,10 +91,19 @@ export default function ChatbotPage() {
     }
   }
 
+  useEffect(() => {
+    const query = searchParams.get("q");
+    if (!query || handledQueryRef.current === query) return;
+    handledQueryRef.current = query;
+    void send(query);
+  // A query from a deliberate in-app action should be sent once on arrival.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   const showSuggestedPrompts = messages.length === 1;
 
   return (
-    <div className="flex h-full flex-col bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="pockit-chat flex h-full flex-col bg-white rounded-xl border border-gray-200 overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-gray-200 px-6 py-4">
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1F78FF] text-white text-sm font-bold">

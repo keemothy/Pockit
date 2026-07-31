@@ -14,7 +14,6 @@ type ProfileSettingsFormProps = {
 const tabs = [
   { href: "/settings/profile", label: "Profile & account" },
   { href: "/settings/security", label: "Security" },
-  { href: "/settings/notifications", label: "Notifications" },
   { href: "/settings/appearance", label: "Appearance" },
   { href: "/settings/privacy", label: "Privacy & data" },
 ];
@@ -38,12 +37,6 @@ export default function ProfileSettingsForm({
   );
   const [language, setLanguage] = useState(
     stringValue(metadata.language) || "en-US",
-  );
-  const [billingAlerts, setBillingAlerts] = useState(
-    metadata.billing_alerts !== false,
-  );
-  const [weeklySummary, setWeeklySummary] = useState(
-    metadata.weekly_spending_summary !== false,
   );
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
@@ -106,8 +99,6 @@ export default function ProfileSettingsForm({
         full_name: `${firstName} ${lastName}`.trim(),
         currency,
         language,
-        billing_alerts: billingAlerts,
-        weekly_spending_summary: weeklySummary,
         avatar_path: avatarPath,
       },
     });
@@ -281,27 +272,7 @@ export default function ProfileSettingsForm({
           </div>
         </fieldset>
 
-        <fieldset className="mt-8 border-t border-slate-200 pt-7">
-          <legend className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-            Communication Preferences
-          </legend>
-          <div className="mt-4 space-y-4">
-            <Toggle
-              label="Renewal and billing alerts"
-              description="Get notified before subscriptions renew or cards are charged."
-              enabled={billingAlerts}
-              onChange={setBillingAlerts}
-            />
-            <Toggle
-              label="Weekly spending summary"
-              description="Receive a weekly overview of spending and savings progress."
-              enabled={weeklySummary}
-              onChange={setWeeklySummary}
-            />
-          </div>
-        </fieldset>
-
-        <div className="mt-8 flex flex-col-reverse gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-8 flex flex-col-reverse gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p role="status" className="text-sm text-slate-500">
             {status ?? "Changes are saved securely to your Pockit account."}
           </p>
@@ -314,42 +285,6 @@ export default function ProfileSettingsForm({
           </button>
         </div>
       </form>
-    </div>
-  );
-}
-
-function Toggle({
-  label,
-  description,
-  enabled,
-  onChange,
-}: {
-  label: string;
-  description: string;
-  enabled: boolean;
-  onChange: (value: boolean) => void;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-5">
-      <div>
-        <p className="text-sm font-semibold text-slate-800">{label}</p>
-        <p className="mt-1 text-sm text-slate-500">{description}</p>
-      </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={enabled}
-        onClick={() => onChange(!enabled)}
-        className={`relative h-7 w-12 shrink-0 cursor-pointer rounded-full transition-colors ${
-          enabled ? "bg-blue-600" : "bg-slate-300"
-        }`}
-      >
-        <span
-          className={`absolute top-1 left-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-            enabled ? "translate-x-5" : "translate-x-0"
-          }`}
-        />
-      </button>
     </div>
   );
 }

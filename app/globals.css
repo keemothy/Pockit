@@ -128,6 +128,42 @@ body {
 .pill-float-2 { animation: pill-float 3.6s ease-in-out infinite 0.65s; }
 .pill-float-3 { animation: pill-float 3.6s ease-in-out infinite 1.3s; }
 
+/* ── Dark mode overrides ───────────────────────────────── */
+.dark {
+  --background: #0b1220;
+  --foreground: #cbd5e1;
+  color-scheme: dark;
+}
+.dark .pockit-dashboard-shell {
+  background: radial-gradient(circle at 25% 0%, #18253b 0%, #0b1220 52%, #080d17 100%) !important;
+}
+.dark .pockit-sidebar {
+  background: #101827 !important;
+  border-right-color: #26354a !important;
+  box-shadow: 2px 0 18px rgba(0,0,0,0.24) !important;
+}
+.dark .bg-white { background-color: #111827 !important; }
+.dark .bg-slate-50 { background-color: #0f172a !important; }
+.dark .bg-slate-100 { background-color: #1e293b !important; }
+.dark .bg-blue-50, .dark .bg-blue-100 { background-color: #172554 !important; }
+.dark .text-slate-900, .dark .text-slate-800, .dark .text-gray-900, .dark .text-gray-800,
+.dark .text-black, .dark .text-zinc-900, .dark .text-zinc-800 { color: #e2e8f0 !important; }
+.dark .text-slate-700, .dark .text-slate-600, .dark .text-gray-700, .dark .text-gray-600,
+.dark .text-zinc-700, .dark .text-zinc-600 { color: #cbd5e1 !important; }
+.dark .text-slate-500, .dark .text-slate-400, .dark .text-gray-500, .dark .text-gray-400,
+.dark .text-zinc-500, .dark .text-zinc-400 { color: #94a3b8 !important; }
+.dark .border-slate-100, .dark .border-slate-200, .dark .border-slate-300,
+.dark .border-gray-100, .dark .border-gray-200, .dark .border-gray-300 { border-color: #334155 !important; }
+.dark input, .dark select, .dark textarea {
+  background-color: #0f172a;
+  color: #f1f5f9;
+  border-color: #475569;
+}
+.dark input::placeholder, .dark textarea::placeholder { color: #94a3b8; }
+.dark .hover\:bg-slate-50:hover, .dark .hover\:bg-gray-100:hover { background-color: #1e293b !important; }
+/* Skeleton in dark mode */
+.dark .skeleton { background-color: #1e293b; }
+
 /* ── Stat card accent top border ───────────────────────── */
 .card-accent-blue::before  { content:''; position:absolute; inset-inline:0; top:0; height:3px; border-radius:20px 20px 0 0; background:linear-gradient(90deg,#1F78FF,#57BEFE); }
 .card-accent-amber::before { content:''; position:absolute; inset-inline:0; top:0; height:3px; border-radius:20px 20px 0 0; background:linear-gradient(90deg,#f59e0b,#fbbf24); }

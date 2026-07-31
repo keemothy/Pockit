@@ -6,6 +6,7 @@ import { PersonalFinanceCategoryVersion } from 'plaid';
 export type SpendingCategory = {
   accountId: string;
   primaryCategory: string;
+  month: string;
   amount: number;
 };
 
@@ -14,9 +15,10 @@ type CreditAccount = {
   plaidItemId: string;
 };
 
-function isoDateMonthStart() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+function isoDateThreeMonthStart() {
+  const date = new Date();
+  date.setUTCMonth(date.getUTCMonth() - 2, 1);
+  return date.toISOString().slice(0, 10);
 }
 
 /**
@@ -51,8 +53,8 @@ export async function getSpendingCategories(
 
       const response = await plaidClient.transactionsGet({
         access_token: accessToken,
-        // The wallet donut is a calendar-month summary, not a rolling window.
-        start_date: isoDateMonthStart(),
+        // Fetch the current calendar month and the two preceding calendar months.
+        start_date: isoDateThreeMonthStart(),
         end_date: new Date().toISOString().slice(0, 10),
         options: {
           account_ids: linkedAccounts.map((account) => account.plaidAccountId),
@@ -64,7 +66,8 @@ export async function getSpendingCategories(
       for (const transaction of response.data.transactions) {
         if (transaction.amount <= 0) continue;
         const category = transaction.personal_finance_category?.primary ?? 'OTHER';
-        const key = `${transaction.account_id}:${category}`;
+        const month = transaction.date.slice(0, 7);
+        const key = `${transaction.account_id}:${month}:${category}`;
         totals.set(key, (totals.get(key) ?? 0) + transaction.amount);
       }
     } catch {
@@ -74,10 +77,12 @@ export async function getSpendingCategories(
   }));
 
   const categories = [...totals.entries()].map(([key, amount]) => {
-    const separator = key.indexOf(':');
+    const firstSeparator = key.indexOf(':');
+    const secondSeparator = key.indexOf(':', firstSeparator + 1);
     return {
-      accountId: key.slice(0, separator),
-      primaryCategory: key.slice(separator + 1),
+      accountId: key.slice(0, firstSeparator),
+      month: key.slice(firstSeparator + 1, secondSeparator),
+      primaryCategory: key.slice(secondSeparator + 1),
       amount,
     };
   });

@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { decryptAccessToken } from '@/lib/plaid-crypto';
 import { hasPlaidCredentials, plaidClient } from '@/lib/plaid';
 import { PersonalFinanceCategoryVersion } from 'plaid';
+import { matchesKnownSubscriptionMerchant } from '@/lib/subscription-catalog';
 
 type CreditAccount = { plaidAccountId: string; plaidItemId: string };
 
@@ -17,6 +18,10 @@ export type SubscriptionCandidate = {
   amount: number;
   lastCharged: string;
   detailedCategory: string;
+  confidence: number;
+  cadence: "weekly" | "monthly";
+  occurrences: number;
+  nextRenewalDate: string;
 };
 
 const CATEGORY_COLORS = ['#2184c7', '#ff9a57', '#9747ba', '#aac437', '#efc93c', '#ff626a'];
@@ -64,6 +69,8 @@ async function fetchAllTransactions(
   if (error || !items) return [];
 
   type TxnRow = {
+    transaction_id: string;
+    name: string;
     amount: number;
     merchant_name?: string | null;
     date: string;
@@ -101,6 +108,41 @@ async function fetchAllTransactions(
   return all;
 }
 
+export type PlaidAnalyticsTransaction = {
+  id: string;
+  accountId: string;
+  name: string;
+  merchantName: string | null;
+  amount: number;
+  date: string;
+  category: string;
+  detailedCategory: string | null;
+};
+
+/** Recent, presentation-safe Plaid transactions for the detailed analytics page. */
+export async function getPlaidAnalyticsTransactions(
+  userId: string,
+  accounts: CreditAccount[],
+  days = 180,
+): Promise<PlaidAnalyticsTransaction[]> {
+  const endDate = new Date().toISOString().slice(0, 10);
+  const startDate = new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10);
+  const transactions = await fetchAllTransactions(userId, accounts, startDate, endDate);
+  return transactions
+    .filter((transaction) => transaction.amount > 0)
+    .map((transaction) => ({
+      id: transaction.transaction_id,
+      accountId: transaction.account_id,
+      name: transaction.name,
+      merchantName: transaction.merchant_name ?? null,
+      amount: transaction.amount,
+      date: transaction.date,
+      category: transaction.personal_finance_category?.primary ?? "OTHER",
+      detailedCategory: transaction.personal_finance_category?.detailed ?? null,
+    }))
+    .sort((first, second) => second.date.localeCompare(first.date));
+}
+
 /** Spending aggregated by primary category for a given date range. */
 export async function getSpendingByCategory(
   userId: string,
@@ -132,56 +174,80 @@ export async function getSpendingByCategory(
 }
 
 const SUBSCRIPTION_KEYWORDS = [
-  'SUBSCRIPTION', 'STREAMING', 'MUSIC', 'AUDIO', 'SOFTWARE',
-  'VIDEO', 'GAMING', 'CABLE', 'PHONE',
+  'SUBSCRIPTION', 'STREAMING', 'MUSIC', 'AUDIO', 'SOFTWARE', 'DIGITAL',
+  'VIDEO', 'GAMING', 'MEMBERSHIP',
 ];
 
-/** Recurring-charge detection: look back 65 days, surface merchants that
- *  billed at least twice with a consistent amount, or whose Plaid detailed
- *  category indicates subscription / streaming services. */
+/**
+ * Conservative 90-day recurring-charge detection. We only suggest services
+ * with a clear subscription signal, so utilities and ordinary repeat shopping
+ * do not overwhelm the user with false positives.
+ */
 export async function getSubscriptionCandidates(
   userId: string,
   accounts: CreditAccount[],
 ): Promise<SubscriptionCandidate[]> {
   const endDate  = new Date().toISOString().slice(0, 10);
-  const startDate = new Date(Date.now() - 65 * 86_400_000).toISOString().slice(0, 10);
+  const startDate = new Date(Date.now() - 90 * 86_400_000).toISOString().slice(0, 10);
 
   const txns = await fetchAllTransactions(userId, accounts, startDate, endDate);
 
-  type Group = { dates: string[]; category: string };
-  const byMerchantAmount = new Map<string, Group>();
+  type Group = { charges: { date: string; amount: number }[]; category: string; name: string };
+  const byMerchant = new Map<string, Group>();
 
   for (const txn of txns) {
     if (txn.amount <= 0 || !txn.merchant_name) continue;
     const name   = txn.merchant_name.trim();
-    const amount = Math.round(txn.amount * 100);
-    const key    = `${name}|${amount}`;
+    const key = name.toUpperCase();
     const detail = txn.personal_finance_category?.detailed ?? txn.personal_finance_category?.primary ?? 'OTHER';
-    const existing = byMerchantAmount.get(key);
+    const existing = byMerchant.get(key);
     if (existing) {
-      existing.dates.push(txn.date);
+      existing.charges.push({ date: txn.date, amount: txn.amount });
     } else {
-      byMerchantAmount.set(key, { dates: [txn.date], category: detail });
+      byMerchant.set(key, { charges: [{ date: txn.date, amount: txn.amount }], category: detail, name });
     }
   }
 
   const results: SubscriptionCandidate[] = [];
 
-  for (const [key, group] of byMerchantAmount.entries()) {
-    const isRecurring = group.dates.length >= 2;
+  for (const group of byMerchant.values()) {
+    const charges = [...group.charges].sort((first, second) => first.date.localeCompare(second.date));
+    const dates = charges.map((charge) => charge.date);
+    const averageAmount = charges.reduce((sum, charge) => sum + charge.amount, 0) / charges.length;
+    const stableAmount = charges.every((charge) => Math.abs(charge.amount - averageAmount) <= Math.max(0.5, averageAmount * 0.05));
+    const intervals = dates.slice(1).map((date, index) => Math.round((new Date(`${date}T00:00:00Z`).getTime() - new Date(`${dates[index]}T00:00:00Z`).getTime()) / 86_400_000));
+    const averageInterval = intervals.reduce((sum, interval) => sum + interval, 0) / Math.max(intervals.length, 1);
+    const cadence = averageInterval >= 5 && averageInterval <= 9 ? "weekly" : averageInterval >= 24 && averageInterval <= 35 ? "monthly" : null;
+    const regularity = intervals.length > 0 && intervals.every((interval) => Math.abs(interval - averageInterval) <= (cadence === "weekly" ? 2 : 5));
+    const enoughOccurrences = cadence === "weekly" ? charges.length >= 5 : charges.length >= 3;
+    const isRecurring = enoughOccurrences && Boolean(cadence) && regularity && stableAmount;
     const isSubCategory = SUBSCRIPTION_KEYWORDS.some((kw) =>
       group.category.toUpperCase().includes(kw),
     );
-    if (!isRecurring && !isSubCategory) continue;
+    const isKnownSubscriptionMerchant = matchesKnownSubscriptionMerchant(group.name);
+    if (!isRecurring || (!isSubCategory && !isKnownSubscriptionMerchant)) continue;
 
-    const [name, amountCents] = key.split('|');
+    const keywordScore = (isSubCategory ? 15 : 0) + (isKnownSubscriptionMerchant ? 20 : 0);
+    const occurrenceScore = Math.min(35, charges.length * 10);
+    const regularityScore = regularity ? 25 : 0;
+    const confidence = Math.min(98, occurrenceScore + regularityScore + keywordScore + 15);
+    const lastCharged = dates.at(-1)!;
+    const renewal = new Date(`${lastCharged}T00:00:00Z`);
+    renewal.setUTCDate(renewal.getUTCDate() + Math.round(averageInterval));
     results.push({
-      name,
-      amount: Number(amountCents) / 100,
-      lastCharged: group.dates.reduce((a, b) => (a > b ? a : b)),
+      name: group.name,
+      amount: Math.round(averageAmount * 100) / 100,
+      lastCharged,
       detailedCategory: group.category,
+      confidence,
+      cadence: cadence!,
+      occurrences: charges.length,
+      nextRenewalDate: renewal.toISOString().slice(0, 10),
     });
   }
 
-  return results.sort((a, b) => b.amount - a.amount);
+  return results
+    .filter((candidate) => candidate.confidence >= 75)
+    .sort((a, b) => b.confidence - a.confidence || b.amount - a.amount)
+    .slice(0, 6);
 }

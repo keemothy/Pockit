@@ -31,21 +31,48 @@ export default async function SubscriptionsPage() {
   const activeAccounts = (accounts ?? []).filter(
     (a) => plaidItemEnvironments[a.plaid_item_id] === activePlaidEnvironment,
   );
-  const creditAccounts = activeAccounts.filter((a) => a.type?.toLowerCase() === "credit");
   const hasConnectedBank = activeAccounts.length > 0;
 
   const subscriptions = await getSubscriptionCandidates(
     user.id,
-    creditAccounts.map((a) => ({ plaidAccountId: a.plaid_account_id, plaidItemId: a.plaid_item_id })),
+    activeAccounts.map((a) => ({ plaidAccountId: a.plaid_account_id, plaidItemId: a.plaid_item_id })),
   ).catch(() => []);
 
-  const monthlyTotal = subscriptions.reduce((s, sub) => s + sub.amount, 0);
+  const { data: savedSubscriptions } = await supabase
+    .from("subscriptions")
+    .select("id, display_name, merchant_name, amount, cadence, last_charged_on, next_renewal_date, detailed_category, confidence, source, status")
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .order("next_renewal_date", { ascending: true, nullsFirst: false });
+  const confirmed = savedSubscriptions ?? [];
+  const confirmedMerchants = new Set(confirmed.map((subscription) => subscription.merchant_name.trim().toLowerCase()));
+  const { data: dismissedCandidates } = await supabase
+    .from("subscription_candidate_dismissals")
+    .select("merchant_key")
+    .eq("user_id", user.id);
+  const dismissedCandidateKeys = (dismissedCandidates ?? []).map((candidate) => candidate.merchant_key);
+  const candidates = subscriptions.filter((subscription) =>
+    !confirmedMerchants.has(subscription.name.trim().toLowerCase())
+    && !dismissedCandidateKeys.includes(subscription.name.trim().toLowerCase()),
+  );
 
   return (
     <SubscriptionsContent
-      subscriptions={subscriptions}
+      candidates={candidates}
+      dismissedCandidateKeys={dismissedCandidateKeys}
+      confirmedSubscriptions={confirmed.map((subscription) => ({
+        id: subscription.id,
+        displayName: subscription.display_name,
+        merchantName: subscription.merchant_name,
+        amount: Number(subscription.amount),
+        cadence: subscription.cadence as "weekly" | "monthly" | "annual" | "custom",
+        lastChargedOn: subscription.last_charged_on,
+        nextRenewalDate: subscription.next_renewal_date,
+        detailedCategory: subscription.detailed_category,
+        confidence: subscription.confidence,
+        source: subscription.source as "plaid" | "manual",
+      }))}
       hasConnectedBank={hasConnectedBank}
-      monthlyTotal={monthlyTotal}
     />
   );
 }
