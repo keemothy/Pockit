@@ -7,7 +7,6 @@ import { createClient } from "@/lib/supabase/client";
 const tabs = [
   { href: "/settings/profile", label: "Profile & account" },
   { href: "/settings/security", label: "Security" },
-  { href: "/settings/notifications", label: "Notifications" },
   { href: "/settings/appearance", label: "Appearance" },
   { href: "/settings/privacy", label: "Privacy & data" },
 ];
@@ -79,11 +78,18 @@ export default function SecuritySettings({
   async function beginTwoFactorEnrollment() {
     setTwoFactorStatus(null);
     setIsUpdatingTwoFactor(true);
-    const resetResponse = await fetch("/api/auth/mfa/reset-enrollment", { method: "POST" });
-    const resetResult = (await resetResponse.json().catch(() => null)) as { error?: string } | null;
+    const resetResponse = await fetch("/api/auth/mfa/reset-enrollment", {
+      method: "POST",
+    });
+    const resetResult = (await resetResponse.json().catch(() => null)) as {
+      error?: string;
+    } | null;
     if (!resetResponse.ok) {
       setIsUpdatingTwoFactor(false);
-      setTwoFactorStatus(resetResult?.error ?? "Unable to reset the incomplete two-factor setup.");
+      setTwoFactorStatus(
+        resetResult?.error ??
+          "Unable to reset the incomplete two-factor setup.",
+      );
       return;
     }
 
@@ -105,11 +111,17 @@ export default function SecuritySettings({
 
   async function cancelTwoFactorEnrollment() {
     setIsUpdatingTwoFactor(true);
-    const response = await fetch("/api/auth/mfa/reset-enrollment", { method: "POST" });
-    const result = (await response.json().catch(() => null)) as { error?: string } | null;
+    const response = await fetch("/api/auth/mfa/reset-enrollment", {
+      method: "POST",
+    });
+    const result = (await response.json().catch(() => null)) as {
+      error?: string;
+    } | null;
     setIsUpdatingTwoFactor(false);
     if (!response.ok) {
-      setTwoFactorStatus(result?.error ?? "Unable to cancel the incomplete two-factor setup.");
+      setTwoFactorStatus(
+        result?.error ?? "Unable to cancel the incomplete two-factor setup.",
+      );
       return;
     }
 
@@ -297,9 +309,6 @@ export default function SecuritySettings({
                   six-digit code.
                 </p>
                 <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-center">
-                  {/* Supabase returns an SVG QR code. A regular image element
-                      reliably renders both its data-URL and raw-SVG forms. */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={
                       qrCode.startsWith("data:")
@@ -327,7 +336,7 @@ export default function SecuritySettings({
                   </label>
                 </div>
                 <p className="mt-4 break-all text-xs text-slate-500">
-                  Can’t scan it? Enter this key manually:{" "}
+                  Scan the QR Code abvoe or enter this key manually:{" "}
                   <span className="font-mono text-slate-700">{secret}</span>
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
