@@ -58,15 +58,49 @@ create table if not exists public.monthly_spending_summaries (
   unique (user_id, financial_account_id, month, category)
 );
 
+-- User-confirmed subscriptions. Candidate detection remains ephemeral; this
+-- table never stores raw Plaid transaction descriptions or transaction IDs.
+create table if not exists public.subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  display_name text not null,
+  merchant_name text not null,
+  amount numeric not null check (amount >= 0),
+  cadence text not null check (cadence in ('weekly', 'monthly', 'annual', 'custom')),
+  last_charged_on date,
+  next_renewal_date date,
+  detailed_category text,
+  confidence integer check (confidence between 0 and 100),
+  source text not null default 'manual' check (source in ('plaid', 'manual')),
+  status text not null default 'active' check (status in ('active', 'cancelled')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- Merchants explicitly rejected by the user as subscription candidates. This
+-- prevents repeated false positives, while deleting a confirmed subscription
+-- intentionally does not create a dismissal and may be suggested again.
+create table if not exists public.subscription_candidate_dismissals (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  merchant_key text not null,
+  created_at timestamptz not null default now(),
+  unique (user_id, merchant_key)
+);
+
 create index if not exists financial_accounts_user_id_idx on public.financial_accounts(user_id);
 create index if not exists plaid_items_user_id_idx on public.plaid_items(user_id);
 create index if not exists manual_cards_user_id_idx on public.manual_cards(user_id);
 create index if not exists monthly_spending_summaries_user_month_idx on public.monthly_spending_summaries(user_id, month);
+create index if not exists subscriptions_user_id_idx on public.subscriptions(user_id);
+create index if not exists subscription_candidate_dismissals_user_id_idx on public.subscription_candidate_dismissals(user_id);
 
 alter table public.plaid_items enable row level security;
 alter table public.financial_accounts enable row level security;
 alter table public.manual_cards enable row level security;
 alter table public.monthly_spending_summaries enable row level security;
+alter table public.subscriptions enable row level security;
+alter table public.subscription_candidate_dismissals enable row level security;
 
 -- Only server-side code using the service-role key can access encrypted Plaid tokens.
 -- Signed-in users may view only their own non-sensitive account display data.
@@ -88,6 +122,20 @@ on public.monthly_spending_summaries for select to authenticated
 using ((select auth.uid()) = user_id);
 
 grant select on public.monthly_spending_summaries to authenticated;
+
+create policy "Users can manage their own subscriptions"
+on public.subscriptions for all to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
+
+grant select, insert, update, delete on public.subscriptions to authenticated;
+
+create policy "Users can manage their own subscription dismissals"
+on public.subscription_candidate_dismissals for all to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
+
+grant select, insert, update, delete on public.subscription_candidate_dismissals to authenticated;
 
 -- Create a private `avatars` bucket in the Supabase dashboard before applying
 -- these policies. Users can only read and manage files inside their own folder.

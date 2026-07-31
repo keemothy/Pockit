@@ -5,6 +5,7 @@ import { displayCatalogCardName, findCatalogCard, getCardCatalog } from '@/lib/r
 import { getRewardRulesForCard } from '@/lib/rewards/reward-rules';
 import { getSpendingCategories } from '@/lib/plaid-spending';
 import { getPlaidEnvironment, type PlaidEnvironment } from '@/lib/plaid';
+import { restoreLegacyPlaidItemEnvironment } from '@/lib/plaid-item-environment';
 
 const categoryColors = ['#2184c7', '#ff9a57', '#9747ba', '#aac437', '#efc93c', '#ff626a'];
 
@@ -136,8 +137,14 @@ export default async function WalletPage() {
     .eq('user_id', user.id)
     .order('created_at');
 
+  const itemEnvironments = await restoreLegacyPlaidItemEnvironment(
+    user.id,
+    (accounts ?? []).map((account) => account.plaid_item_id),
+    activePlaidEnvironment,
+    plaidItemEnvironments,
+  ).catch(() => plaidItemEnvironments);
   const activeAccounts = (accounts ?? []).filter(
-    (account) => plaidItemEnvironments[account.plaid_item_id] === activePlaidEnvironment,
+    (account) => itemEnvironments[account.plaid_item_id] === activePlaidEnvironment,
   );
   const creditCardAccounts = activeAccounts.filter((account) => account.type?.toLowerCase() === 'credit');
   const connectedBanks = Object.values(activeAccounts.reduce<Record<string, ConnectedPlaidBank>>(
