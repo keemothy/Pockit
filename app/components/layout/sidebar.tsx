@@ -5,6 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
+/* icon imports from lucide; idk why the comment got deleted before
+- wallet/subscriptions/chatbot icons WILL differ from the original figma design
+- no EXACT matches; should be fine since they're still distinguisable icons
+*/
 import {
   Bot,
   ChartPie,
@@ -21,23 +25,23 @@ import { createClient } from "@/lib/supabase/client";
 import { GlassPress } from "@/app/components/ui/glass-press";
 
 const links = [
-  { href: "/",              label: "Dashboard",    icon: LayoutDashboard },
-  { href: "/wallet",        label: "Wallet",        icon: WalletCards    },
-  { href: "/analytics",     label: "Analytics",     icon: ChartPie       },
-  { href: "/subscriptions", label: "Subscriptions", icon: CreditCard     },
-  { href: "/chatbot",       label: "Chatbot",       icon: Bot            },
-  { href: "/settings",      label: "Settings",      icon: Settings       },
+  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/wallet", label: "Wallet", icon: WalletCards },
+  { href: "/analytics", label: "Analytics", icon: ChartPie },
+  { href: "/subscriptions", label: "Subscriptions", icon: CreditCard },
+  { href: "/chatbot", label: "Chatbot", icon: Bot },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-const W_OPEN   = 220;
+const W_OPEN = 272;
 const W_CLOSED = 68;
-const PX_OPEN  = 14;
+const PX_OPEN = 14;
 const PX_CLOSE = 10;
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const pathname = usePathname();
-  const router   = useRouter();
+  const router = useRouter();
 
   const px = isOpen ? PX_OPEN : PX_CLOSE;
 
@@ -60,34 +64,28 @@ export default function Sidebar() {
         height: "100%",
         minHeight: 0,
         background: "#ffffff",
-        borderRight: "1px solid rgba(31,120,255,0.09)",
         boxShadow: "2px 0 16px rgba(31,120,255,0.04)",
       }}
     >
-      {/* Brand strip — full height, leftmost edge */}
-      <div
-        className="pointer-events-none absolute left-0 top-0 bottom-0 z-10"
-        style={{
-          width: 4,
-          background: "linear-gradient(to bottom, #1F78FF 0%, #a855f7 58%, #ec4899 100%)",
-        }}
-      />
-
-      {/* Collapse toggle — z-30 so it stays above main content */}
+      {/* SIDEBAR TOGGLE BUTTON (<, >) */}
       <button
         type="button"
         onClick={() => setIsOpen((o) => !o)}
-        className="absolute -right-3 top-6 z-30 flex h-6 w-6 items-center justify-center rounded-full border bg-white shadow-sm transition-shadow hover:shadow-md"
+        className="absolute -right-3 top-6 z-30 flex h-6 w-6 items-center justify-center rounded-full cursor-pointer border bg-white shadow-sm transition-shadow hover:shadow-md"
         style={{ borderColor: "rgba(31,120,255,0.14)" }}
       >
-        {isOpen
-          ? <ChevronLeft className="h-3.5 w-3.5 text-slate-400" />
-          : <ChevronRight className="h-3.5 w-3.5 text-slate-400" />}
+        {isOpen ? (
+          <ChevronLeft className="h-3.5 w-3.5 text-slate-400" />
+        ) : (
+          <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+        )}
       </button>
 
-      {/* ── Row 1: Logo + section label ── */}
+      {/* LOGO DESIGN FOR POCKIT */}
       <div style={{ padding: `20px ${px}px 8px ${px}px` }}>
-        <div className={`flex items-center gap-2.5 ${!isOpen ? "justify-center" : ""}`}>
+        <div
+          className={`flex items-center gap-2.5 ${!isOpen ? "justify-center" : ""}`}
+        >
           <Image
             src="/pockit_logo.png"
             alt="Pockit"
@@ -99,7 +97,8 @@ export default function Sidebar() {
             <span
               className="truncate text-[21px] font-black tracking-[-0.03em]"
               style={{
-                background: "linear-gradient(135deg, #1F78FF 0%, #a855f7 55%, #ec4899 100%)",
+                background:
+                  "linear-gradient(135deg, #1F78FF 0%, #a855f7 55%, #ec4899 100%)",
                 WebkitBackgroundClip: "text",
                 backgroundClip: "text",
                 color: "transparent",
@@ -117,14 +116,15 @@ export default function Sidebar() {
         )}
       </div>
 
-      {/* ── Row 2: Nav links (scrollable, fills remaining height) ── */}
+      {/* NAV LINKS FOR THE MENU */}
       <div className="overflow-y-auto" style={{ padding: `4px ${px}px` }}>
         <ul className="space-y-0.5">
           {links.map((link) => {
             const isActive =
               link.href === "/"
                 ? pathname === "/"
-                : pathname === link.href || pathname.startsWith(link.href + "/");
+                : pathname === link.href ||
+                  pathname.startsWith(link.href + "/");
             const Icon = link.icon;
 
             return (
@@ -138,10 +138,15 @@ export default function Sidebar() {
                         ? "text-white"
                         : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
                     } ${!isOpen ? "justify-center" : ""}`}
-                    style={isActive ? {
-                      background: "linear-gradient(135deg, #1F78FF, #4f9dff)",
-                      boxShadow: "0 2px 10px rgba(31,120,255,0.28)",
-                    } : {}}
+                    style={
+                      isActive
+                        ? {
+                            background:
+                              "linear-gradient(135deg, #1F78FF, #4f9dff)",
+                            boxShadow: "0 2px 10px rgba(31,120,255,0.28)",
+                          }
+                        : {}
+                    }
                   >
                     <Icon className="h-[17px] w-[17px] shrink-0" />
                     {isOpen && <span className="truncate">{link.label}</span>}
@@ -153,7 +158,7 @@ export default function Sidebar() {
         </ul>
       </div>
 
-      {/* ── Row 3: Sign out — always pinned at bottom ── */}
+      {/* SIGN OUT BUTTON */}
       <div
         className="border-t border-slate-100"
         style={{ padding: `12px ${px}px 20px ${px}px` }}
