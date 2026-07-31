@@ -10,7 +10,6 @@ type Connection = { id: string; name: string; accounts: string[] };
 const tabs = [
   { href: "/settings/profile", label: "Profile & account" },
   { href: "/settings/security", label: "Security" },
-  { href: "/settings/notifications", label: "Notifications" },
   { href: "/settings/appearance", label: "Appearance" },
   { href: "/settings/privacy", label: "Privacy & data" },
 ];
