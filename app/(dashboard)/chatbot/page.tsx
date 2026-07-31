@@ -103,7 +103,7 @@ export default function ChatbotPage() {
   const showSuggestedPrompts = messages.length === 1;
 
   return (
-    <div className="flex h-full flex-col bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="pockit-chat flex h-full flex-col bg-white rounded-xl border border-gray-200 overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-gray-200 px-6 py-4">
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1F78FF] text-white text-sm font-bold">

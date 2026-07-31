@@ -17,6 +17,36 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+/* Theme overrides keep the existing Tailwind-heavy UI legible in dark mode. */
+.dark {
+  --background: #0b1220;
+  --foreground: #cbd5e1;
+  color-scheme: dark;
+}
+.dark .pockit-dashboard-shell { background: radial-gradient(circle at 25% 0%, #18253b 0%, #0b1220 52%, #080d17 100%) !important; }
+.dark .pockit-sidebar { background: #101827 !important; border-right-color: #26354a !important; box-shadow: 2px 0 18px rgba(0, 0, 0, 0.24) !important; }
+.dark .bg-white { background-color: #111827 !important; }
+.dark .bg-slate-50 { background-color: #0f172a !important; }
+.dark .bg-slate-100 { background-color: #1e293b !important; }
+.dark .bg-blue-50, .dark .bg-blue-100 { background-color: #172554 !important; }
+.dark .bg-\[\#E9F1FF\] { background-color: #101c33 !important; }
+.dark .text-slate-900, .dark .text-slate-800, .dark .text-gray-900, .dark .text-gray-800, .dark .text-black, .dark .text-\[\#172033\], .dark .text-\[\#121926\], .dark .text-zinc-900, .dark .text-zinc-800 { color: #e2e8f0 !important; }
+.dark .text-slate-700, .dark .text-slate-600, .dark .text-gray-700, .dark .text-gray-600, .dark .text-zinc-700, .dark .text-zinc-600 { color: #cbd5e1 !important; }
+.dark .text-slate-500, .dark .text-slate-400, .dark .text-gray-500, .dark .text-gray-400, .dark .text-zinc-500, .dark .text-zinc-400 { color: #94a3b8 !important; }
+.dark .text-\[\#1F78FF\], .dark .text-\[\#2865e9\], .dark .text-\[\#2878f0\] { color: #93c5fd !important; }
+.dark .border-slate-100, .dark .border-slate-200, .dark .border-slate-300, .dark .border-gray-100, .dark .border-gray-200, .dark .border-gray-300 { border-color: #334155 !important; }
+.dark input, .dark select { background-color: #0f172a; color: #f1f5f9; border-color: #475569; }
+.dark input::placeholder { color: #94a3b8; }
+.dark .hover\:bg-slate-50:hover, .dark .hover\:bg-gray-100:hover { background-color: #1e293b !important; }
+.dark .pockit-wallet .bg-\[\#ececec\] { background-color: #182233 !important; }
+.dark .pockit-wallet .bg-\[\#eaf3ff\], .dark .pockit-wallet .bg-\[\#f7fbff\], .dark .pockit-chat .bg-\[\#E9F1FF\] { background-color: #172554 !important; }
+.dark .pockit-chat .border-blue-100, .dark .pockit-chat .border-blue-200 { border-color: #29456f !important; }
+.dark .potential-subscriptions.bg-blue-50 { background-color: #14233a !important; border-color: #2b4a71 !important; }
+.dark .potential-subscriptions .bg-white { background-color: #18283e !important; }
+.dark .potential-subscriptions .border-blue-100, .dark .potential-subscriptions .border-blue-200 { border-color: #35577f !important; }
+.dark .potential-subscriptions h2 { color: #e2e8f0 !important; }
+.dark .potential-subscriptions > div > div > p { color: #a8b7ca !important; }
+
 /* ── Aurora blob keyframes (login left panel) ────────────── */
 @keyframes aurora-1 {
   0%,  100% { transform: translate(0px,   0px)  scale(1);    }
