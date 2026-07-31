@@ -11,6 +11,8 @@ type ProfileSettingsFormProps = {
   avatarUrl: string | null;
 };
 
+// sub-tabs within settings; routing logic should be the same as the routing from sidebar w/o icons
+
 const tabs = [
   { href: "/settings/profile", label: "Profile & account" },
   { href: "/settings/security", label: "Security" },
@@ -49,6 +51,7 @@ export default function ProfileSettingsForm({
     [firstName, lastName],
   );
 
+  // saving settings for data persistence; any modifications to a user preferences NEED to be saved;
   async function saveSettings(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus(null);
@@ -121,6 +124,8 @@ export default function ProfileSettingsForm({
     );
     router.refresh();
   }
+
+  // avatar selection uploading
 
   function chooseAvatar(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];

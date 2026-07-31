@@ -34,6 +34,7 @@ export default function SecuritySettings({
   const [twoFactorStatus, setTwoFactorStatus] = useState<string | null>(null);
   const [isUpdatingTwoFactor, setIsUpdatingTwoFactor] = useState(false);
 
+  // PW changer; also apply restriction of at least 8 chars
   async function changePassword(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPasswordStatus(null);
@@ -75,6 +76,7 @@ export default function SecuritySettings({
     setPasswordStatus("Your password has been updated.");
   }
 
+  // 2FA enrollment process; users MUST use an external app for registration
   async function beginTwoFactorEnrollment() {
     setTwoFactorStatus(null);
     setIsUpdatingTwoFactor(true);
@@ -156,6 +158,7 @@ export default function SecuritySettings({
     setTwoFactorStatus("Two-factor authentication is enabled.");
   }
 
+  // users may also disable the 2FA if they want; ideally have this off for dev purposes
   async function disableTwoFactor() {
     if (!factorId) return;
 
@@ -183,17 +186,13 @@ export default function SecuritySettings({
         Protect your account and manage authentication.
       </p>
 
-      <nav
-        aria-label="Settings sections"
-        className="mt-6 flex gap-1 overflow-x-auto border-b border-slate-200"
-      >
+      <nav className="mt-6 flex gap-1 overflow-x-auto border-b border-slate-200">
         {tabs.map((tab) => {
           const active = tab.href === "/settings/security";
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              aria-current={active ? "page" : undefined}
               className={`shrink-0 border-b-2 px-3 py-3 text-sm font-medium transition-colors ${active ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800"}`}
             >
               {tab.label}
@@ -252,11 +251,7 @@ export default function SecuritySettings({
                 />
               </div>
               <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p
-                  role="status"
-                  aria-live="polite"
-                  className="text-sm text-slate-500"
-                >
+                <p role="status" className="text-sm text-slate-500">
                   {passwordStatus}
                 </p>
                 <button
@@ -283,8 +278,6 @@ export default function SecuritySettings({
               <button
                 type="button"
                 role="switch"
-                aria-checked={isTwoFactorEnabled}
-                aria-label="Two-factor authentication"
                 disabled={isUpdatingTwoFactor}
                 onClick={() =>
                   void (isTwoFactorEnabled
@@ -361,11 +354,7 @@ export default function SecuritySettings({
               </form>
             )}
 
-            <p
-              role="status"
-              aria-live="polite"
-              className="mt-4 text-sm text-slate-500"
-            >
+            <p role="status" className="mt-4 text-sm text-slate-500">
               {twoFactorStatus ??
                 (isTwoFactorEnabled
                   ? "Two-factor authentication is enabled."
