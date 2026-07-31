@@ -8,7 +8,7 @@ export default function DashboardLayout({
 }>) {
   return (
     <div
-      className="dashboard-texture relative flex h-screen overflow-hidden"
+      className="pockit-dashboard-shell dashboard-texture relative flex h-screen overflow-hidden"
       style={{ background: "linear-gradient(155deg, #edf3ff 0%, #f2f7ff 40%, #f8fbff 100%)" }}
     >
       <Sidebar />

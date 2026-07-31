@@ -50,7 +50,7 @@ export default function Sidebar() {
 
   return (
     <nav
-      className="relative transition-all duration-300"
+      className="pockit-sidebar relative transition-all duration-300"
       style={{
         /* CSS Grid: top-section | scrollable-links | sign-out */
         display: "grid",
