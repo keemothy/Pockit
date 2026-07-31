@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import type { ChatMessage, ChatResponse } from "@/lib/chatbot-context";
 
 interface DisplayMessage {
@@ -25,11 +26,13 @@ const WELCOME: DisplayMessage = {
 };
 
 export default function ChatbotPage() {
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<DisplayMessage[]>([WELCOME]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const handledQueryRef = useRef<string | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -87,6 +90,15 @@ export default function ChatbotPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    const query = searchParams.get("q");
+    if (!query || handledQueryRef.current === query) return;
+    handledQueryRef.current = query;
+    void send(query);
+  // A query from a deliberate in-app action should be sent once on arrival.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const showSuggestedPrompts = messages.length === 1;
 
