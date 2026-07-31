@@ -82,13 +82,18 @@ function displayCategory(category: string) {
 
 function readManualCategoryList(value: unknown) {
   if (!Array.isArray(value)) return [] as WalletCard['categories'];
-  return value.flatMap((category, index) => {
+  const totals = new Map<string, number>();
+  for (const category of value) {
     if (!category || typeof category !== 'object') return [];
     const candidate = category as Record<string, unknown>;
-    return typeof candidate.label === 'string' && typeof candidate.amount === 'number' && candidate.amount > 0
-      ? [{ label: candidate.label, amount: candidate.amount, color: categoryColors[index % categoryColors.length] }]
-      : [];
-  });
+    if (typeof candidate.label !== 'string' || typeof candidate.amount !== 'number' || candidate.amount <= 0) continue;
+    totals.set(candidate.label, (totals.get(candidate.label) ?? 0) + candidate.amount);
+  }
+  return [...totals.entries()].map(([label, amount], index) => ({
+    label,
+    amount,
+    color: categoryColors[index % categoryColors.length],
+  }));
 }
 
 function readManualCategories(value: unknown) {
@@ -118,7 +123,6 @@ export default async function WalletPage() {
   const cardIdentityOverrides = readCardIdentityOverrides(userMetadata);
   const plaidItemEnvironments = readPlaidItemEnvironments(userMetadata);
   const activePlaidEnvironment = getPlaidEnvironment();
-  const spendingPeriodLabel = 'Last 90 days';
 
   const { data: accounts } = await supabase
     .from('financial_accounts')
@@ -185,22 +189,28 @@ export default async function WalletPage() {
     const hasRewardOverride = Object.hasOwn(rewardOverrides, account.id);
     const rewardDetails = hasRewardOverride ? rewardOverrides[account.id] : catalogRewardDetails;
 
-    const spendingByCategory = new Map<string, number>();
+    const spendingByMonth = new Map<string, Map<string, number>>();
     for (const transaction of spendingCategories) {
       if (transaction.accountId !== account.plaid_account_id) continue;
       const category = displayCategory(transaction.primaryCategory);
+      const spendingByCategory = spendingByMonth.get(transaction.month) ?? new Map<string, number>();
       spendingByCategory.set(
         category,
         (spendingByCategory.get(category) ?? 0) + transaction.amount,
       );
+      spendingByMonth.set(transaction.month, spendingByCategory);
     }
-    const categories = [...spendingByCategory.entries()]
-      .sort(([, amountA], [, amountB]) => amountB - amountA)
-      .map(([category, amount], categoryIndex) => ({
-        label: category,
-        amount,
-        color: categoryColors[categoryIndex % categoryColors.length],
-      }));
+    const monthlyCategories = Object.fromEntries([...spendingByMonth.entries()].map(([month, spendingByCategory]) => [
+      month,
+      [...spendingByCategory.entries()]
+        .sort(([, amountA], [, amountB]) => amountB - amountA)
+        .map(([category, amount], categoryIndex) => ({
+          label: category,
+          amount,
+          color: categoryColors[categoryIndex % categoryColors.length],
+        })),
+    ]));
+    const categories = monthlyCategories[new Date().toISOString().slice(0, 7)] ?? [];
 
     return {
       id: account.id,
@@ -217,6 +227,7 @@ export default async function WalletPage() {
       catalogCardId: catalogCard?.cardId,
       hasSpendingData: categories.length > 0,
       categories,
+      monthlyCategories,
     };
   });
 
@@ -257,10 +268,9 @@ export default async function WalletPage() {
 
   return (
     <WalletDashboard
-      key={cards.map((card) => `${card.id}:${card.name}:${card.categories.map((category) => `${category.label}-${category.amount}`).join(',')}`).join('|')}
+      key={cards.map((card) => `${card.id}:${card.name}:${JSON.stringify(card.monthlyCategories ?? card.categories)}`).join('|')}
       initialCards={cards}
       cardholderName={cardholderName}
-      spendingPeriodLabel={spendingPeriodLabel}
       hasConnectedNonCreditAccounts={activeAccounts.some(
         (account) => account.type?.toLowerCase() !== 'credit',
       )}
