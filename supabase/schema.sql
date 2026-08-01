@@ -88,12 +88,24 @@ create table if not exists public.subscription_candidate_dismissals (
   unique (user_id, merchant_key)
 );
 
+-- A user-owned dashboard arrangement. Widget IDs are application values, so
+-- validation is also enforced by the authenticated API route.
+create table if not exists public.dashboard_preferences (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null unique references auth.users(id) on delete cascade,
+  widget_order jsonb not null default '["total-balance", "monthly-spending", "subscription-spending", "category", "trend", "recent-transactions"]'::jsonb,
+  hidden_widgets jsonb not null default '[]'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists financial_accounts_user_id_idx on public.financial_accounts(user_id);
 create index if not exists plaid_items_user_id_idx on public.plaid_items(user_id);
 create index if not exists manual_cards_user_id_idx on public.manual_cards(user_id);
 create index if not exists monthly_spending_summaries_user_month_idx on public.monthly_spending_summaries(user_id, month);
 create index if not exists subscriptions_user_id_idx on public.subscriptions(user_id);
 create index if not exists subscription_candidate_dismissals_user_id_idx on public.subscription_candidate_dismissals(user_id);
+create index if not exists dashboard_preferences_user_id_idx on public.dashboard_preferences(user_id);
 
 alter table public.plaid_items enable row level security;
 alter table public.financial_accounts enable row level security;
@@ -101,6 +113,7 @@ alter table public.manual_cards enable row level security;
 alter table public.monthly_spending_summaries enable row level security;
 alter table public.subscriptions enable row level security;
 alter table public.subscription_candidate_dismissals enable row level security;
+alter table public.dashboard_preferences enable row level security;
 
 -- Only server-side code using the service-role key can access encrypted Plaid tokens.
 -- Signed-in users may view only their own non-sensitive account display data.
@@ -136,6 +149,13 @@ using ((select auth.uid()) = user_id)
 with check ((select auth.uid()) = user_id);
 
 grant select, insert, update, delete on public.subscription_candidate_dismissals to authenticated;
+
+create policy "Users can manage their own dashboard preferences"
+on public.dashboard_preferences for all to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
+
+grant select, insert, update, delete on public.dashboard_preferences to authenticated;
 
 -- Create a private `avatars` bucket in the Supabase dashboard before applying
 -- these policies. Users can only read and manage files inside their own folder.
