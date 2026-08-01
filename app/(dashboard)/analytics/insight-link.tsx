@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { MouseEvent, ReactNode } from "react";
 
 export function InsightLink({ href, children }: { href: string; children: ReactNode }) {
-  const className = "hidden whitespace-nowrap text-xs font-semibold text-[#247dff] hover:underline sm:block";
+  const className = "hidden whitespace-nowrap text-xs font-semibold text-[#1F78FF] hover:underline sm:block";
 
   function highlightTarget(event: MouseEvent<HTMLAnchorElement>) {
     if (!href.startsWith("#")) return;

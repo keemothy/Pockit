@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { ChatMessage, ChatResponse } from "@/lib/chatbot-context";
@@ -25,7 +25,7 @@ const WELCOME: DisplayMessage = {
     "Hi! I'm your Pockit assistant. I can help you pick the right credit card for any purchase, explain your card benefits, or walk you through canceling a subscription step by step. What can I help you with?",
 };
 
-export default function ChatbotPage() {
+function ChatbotPage() {
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<DisplayMessage[]>([WELCOME]);
   const [input, setInput] = useState("");
@@ -233,5 +233,13 @@ export default function ChatbotPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ChatbotPageWrapper() {
+  return (
+    <Suspense>
+      <ChatbotPage />
+    </Suspense>
   );
 }

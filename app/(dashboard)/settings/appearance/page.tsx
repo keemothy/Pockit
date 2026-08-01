@@ -3,9 +3,13 @@ import AppearanceSettings from "./appearance-settings";
 export default function AppearanceSettingsPage() {
   return (
     <section className="mx-auto w-full max-w-6xl pb-8">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Settings</h1>
-        <p className="mt-1 text-slate-600">Manage your account, preferences, and privacy.</p>
+      <div className="mb-6">
+        <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+          Settings
+        </p>
+        <h1 className="mt-0.5 text-[28px] font-black tracking-tight text-slate-900">
+          Appearance
+        </h1>
       </div>
       <AppearanceSettings />
     </section>

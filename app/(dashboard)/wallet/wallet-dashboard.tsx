@@ -810,12 +810,14 @@ export default function WalletDashboard({
         </p>
       )}
       <main className="w-full min-w-0">
-        <header className="border-b border-slate-100 pb-6">
+        <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Wallets</h1>
-            <p className="mt-1 text-[15px] text-slate-500">
-              Track credit card usage, and monthly expenses.
+            <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+              Wallet
             </p>
+            <h1 className="mt-0.5 text-[28px] font-black tracking-tight text-slate-900">
+              Your cards
+            </h1>
           </div>
         </header>
 
@@ -854,7 +856,7 @@ export default function WalletDashboard({
                 setManualCardError("");
                 setIsModalOpen(true);
               }}
-              className="rounded-xl bg-[#2865e9] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
+              className="rounded-xl bg-[#1F78FF] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
             >
               ＋ &nbsp; Add credit card
             </button>
@@ -875,7 +877,7 @@ export default function WalletDashboard({
             </p>
             <a
               href="/auth/connect-bank"
-              className="mt-5 inline-block rounded-xl bg-[#2865e9] px-4 py-2 text-sm font-medium text-white"
+              className="mt-5 inline-block rounded-xl bg-[#1F78FF] px-4 py-2 text-sm font-medium text-white"
             >
               Connect bank
             </a>
@@ -978,7 +980,7 @@ export default function WalletDashboard({
                       <button
                         type="button"
                         onClick={() => openManualEditor(card)}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-[#2865e9] hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-[#1F78FF] hover:underline"
                       >
                         <Pencil size={13} aria-hidden="true" />
                         Edit card
@@ -987,7 +989,7 @@ export default function WalletDashboard({
                       <button
                         type="button"
                         onClick={() => openCardMatcher(card)}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-[#2865e9] hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-[#1F78FF] hover:underline"
                       >
                         <Pencil size={13} aria-hidden="true" />
                         {card.catalogCardId ? "Change card" : "Match card"}
@@ -1008,7 +1010,7 @@ export default function WalletDashboard({
                       aria-hidden="true"
                     >
                       <span
-                        className={`h-full w-8 rounded-full ${isCurrentCard ? "ml-auto bg-[#2865e9]" : "bg-[#cfcfcf]"}`}
+                        className={`h-full w-8 rounded-full ${isCurrentCard ? "ml-auto bg-[#1F78FF]" : "bg-[#cfcfcf]"}`}
                       />
                     </span>
                     <span className="mt-1 block text-[11px] font-medium text-slate-600">
@@ -1051,7 +1053,7 @@ export default function WalletDashboard({
                             }))
                           }
                           aria-pressed={selectedSpendingMonth === month}
-                          className={`rounded-md px-2 py-1 text-[10px] font-semibold transition ${selectedSpendingMonth === month ? "bg-[#2865e9] text-white" : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}
+                          className={`rounded-md px-2 py-1 text-[10px] font-semibold transition ${selectedSpendingMonth === month ? "bg-[#1F78FF] text-white" : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}
                         >
                           {displayMonth(month)}
                         </button>
@@ -1096,7 +1098,7 @@ export default function WalletDashboard({
                       <button
                         type="button"
                         onClick={() => openRewardEditor(card)}
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-[#2865e9] hover:underline"
+                        className="inline-flex items-center gap-1 text-[11px] font-medium text-[#1F78FF] hover:underline"
                       >
                         <Pencil size={12} aria-hidden="true" />
                         Edit
@@ -1138,7 +1140,7 @@ export default function WalletDashboard({
                                 <span className="truncate font-medium text-slate-700">
                                   {reward.label}
                                 </span>
-                                <strong className="shrink-0 text-[#2865e9]">
+                                <strong className="shrink-0 text-[#1F78FF]">
                                   {reward.points.toLocaleString()} pts
                                 </strong>
                               </div>
@@ -1146,7 +1148,7 @@ export default function WalletDashboard({
                           </div>
                           <div className="mt-2 flex justify-between border-t border-slate-100 pt-2 text-lg font-bold">
                             <span>Total</span>
-                            <span className="text-[#2865e9]">
+                            <span className="text-[#1F78FF]">
                               {totalRewardPoints.toLocaleString()} pts
                             </span>
                           </div>
@@ -1177,7 +1179,7 @@ export default function WalletDashboard({
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-semibold text-[#2865e9]">Wallets</p>
+                <p className="text-sm font-semibold text-[#1F78FF]">Wallets</p>
                 <h2 id="manage-cards-title" className="mt-1 text-2xl font-bold">
                   Manage cards
                 </h2>
@@ -1285,7 +1287,7 @@ export default function WalletDashboard({
           >
             <div className="flex justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold text-[#2865e9]">
+                <p className="text-sm font-semibold text-[#1F78FF]">
                   Connected card
                 </p>
                 <h2 id="card-matcher-title" className="mt-1 text-2xl font-bold">
@@ -1387,7 +1389,7 @@ export default function WalletDashboard({
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold text-[#2865e9]">Wallets</p>
+                <p className="text-sm font-semibold text-[#1F78FF]">Wallets</p>
                 <h2
                   id="add-card-details-title"
                   className="mt-1 text-2xl font-bold"
@@ -1552,7 +1554,7 @@ export default function WalletDashboard({
                       },
                     ])
                   }
-                  className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#2865e9]"
+                  className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#1F78FF]"
                 >
                   <Plus size={15} aria-hidden="true" />
                   Add spending category
@@ -1574,7 +1576,7 @@ export default function WalletDashboard({
                 <button
                   type="submit"
                   disabled={isSavingManualCard}
-                  className="flex-1 rounded-lg bg-[#2865e9] py-2.5 font-medium text-white disabled:opacity-60"
+                  className="flex-1 rounded-lg bg-[#1F78FF] py-2.5 font-medium text-white disabled:opacity-60"
                 >
                   {isSavingManualCard ? "Adding…" : "Add card"}
                 </button>
@@ -1594,7 +1596,7 @@ export default function WalletDashboard({
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold text-[#2865e9]">
+                <p className="text-sm font-semibold text-[#1F78FF]">
                   Manual credit card
                 </p>
                 <h2
@@ -1752,7 +1754,7 @@ export default function WalletDashboard({
                       },
                     ])
                   }
-                  className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#2865e9]"
+                  className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#1F78FF]"
                 >
                   <Plus size={15} aria-hidden="true" />
                   Add spending category
@@ -1775,7 +1777,7 @@ export default function WalletDashboard({
                   type="button"
                   disabled={isSavingManualCard}
                   onClick={saveManualCard}
-                  className="flex-1 rounded-lg bg-[#2865e9] py-2.5 font-medium text-white disabled:opacity-60"
+                  className="flex-1 rounded-lg bg-[#1F78FF] py-2.5 font-medium text-white disabled:opacity-60"
                 >
                   {isSavingManualCard ? "Saving…" : "Save changes"}
                 </button>
@@ -1795,7 +1797,7 @@ export default function WalletDashboard({
           >
             <div className="flex justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold text-[#2865e9]">
+                <p className="text-sm font-semibold text-[#1F78FF]">
                   {rewardEditorCard.name}
                 </p>
                 <h2
@@ -1884,7 +1886,7 @@ export default function WalletDashboard({
                   { label: "Dining", multiplier: 1, rewardCurrency: "POINTS" },
                 ])
               }
-              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#2865e9]"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#1F78FF]"
             >
               <Plus size={15} aria-hidden="true" />
               Add reward rate
@@ -1904,7 +1906,7 @@ export default function WalletDashboard({
                 type="button"
                 disabled={isSavingRewards}
                 onClick={saveRewards}
-                className="flex-1 rounded-lg bg-[#2865e9] py-2.5 font-medium text-white disabled:opacity-60"
+                className="flex-1 rounded-lg bg-[#1F78FF] py-2.5 font-medium text-white disabled:opacity-60"
               >
                 {isSavingRewards ? "Saving…" : "Save rewards"}
               </button>

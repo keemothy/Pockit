@@ -166,7 +166,7 @@ function SubscriptionForm({
       <div className="max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-semibold text-[#2878f0]">
+            <p className="text-sm font-semibold text-[#1F78FF]">
               Subscriptions
             </p>
             <h2 className="mt-1 text-2xl font-bold">{title}</h2>
@@ -200,7 +200,7 @@ function SubscriptionForm({
                     current === category.id ? null : category.id,
                   )
                 }
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${popularCategory === category.id ? "bg-blue-100 text-[#2878f0]" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${popularCategory === category.id ? "bg-blue-100 text-[#1F78FF]" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
               >
                 {category.label}
               </button>
@@ -219,7 +219,7 @@ function SubscriptionForm({
                       merchantName: service.name,
                     })
                   }
-                  className={`rounded-lg border px-3 py-2 text-left text-xs font-medium ${draft.displayName === service.name ? "border-[#2878f0] bg-blue-50 text-[#2878f0]" : "border-slate-200 text-slate-600 hover:border-blue-200 hover:bg-slate-50"}`}
+                  className={`rounded-lg border px-3 py-2 text-left text-xs font-medium ${draft.displayName === service.name ? "border-[#1F78FF] bg-blue-50 text-[#1F78FF]" : "border-slate-200 text-slate-600 hover:border-blue-200 hover:bg-slate-50"}`}
                 >
                   {service.name}
                 </button>
@@ -234,7 +234,7 @@ function SubscriptionForm({
               value={draft.displayName}
               onChange={(event) => field("displayName", event.target.value)}
               placeholder="e.g. Netflix"
-              className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#2878f0]"
+              className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#1F78FF]"
             />
           </label>
           <label className="text-sm font-medium">
@@ -245,7 +245,7 @@ function SubscriptionForm({
               step="0.01"
               value={draft.amount || ""}
               onChange={(event) => field("amount", Number(event.target.value))}
-              className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#2878f0]"
+              className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#1F78FF]"
             />
           </label>
           <label className="text-sm font-medium">
@@ -255,7 +255,7 @@ function SubscriptionForm({
               onChange={(event) =>
                 field("cadence", event.target.value as Cadence)
               }
-              className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 outline-none focus:border-[#2878f0]"
+              className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 outline-none focus:border-[#1F78FF]"
             >
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
@@ -271,7 +271,7 @@ function SubscriptionForm({
               onChange={(event) =>
                 field("lastChargedOn", event.target.value || null)
               }
-              className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#2878f0]"
+              className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#1F78FF]"
             />
           </label>
           {automaticRenewal ? (
@@ -292,7 +292,7 @@ function SubscriptionForm({
                 onChange={(event) =>
                   field("nextRenewalDate", event.target.value || null)
                 }
-                className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#2878f0]"
+                className="mt-1.5 w-full rounded-xl border border-slate-300 px-3 py-2.5 outline-none focus:border-[#1F78FF]"
               />
             </label>
           )}
@@ -307,7 +307,7 @@ function SubscriptionForm({
           <button
             disabled={saving}
             onClick={onSave}
-            className="rounded-xl bg-[#2878f0] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+            className="rounded-xl bg-[#1F78FF] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save subscription"}
           </button>
@@ -483,21 +483,21 @@ export default function SubscriptionsContent({
   }
   return (
     <div className="space-y-6 text-slate-800">
-      <header className="flex flex-wrap items-end justify-between gap-4">
+      <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="mt-1 text-4xl font-bold tracking-tight">
-            Your subscriptions
-          </h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Confirm detected recurring charges, then manage them in one place.
+          <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+            Subscriptions
           </p>
+          <h1 className="mt-0.5 text-[28px] font-black tracking-tight text-slate-900">
+            Recurring charges
+          </h1>
         </div>
         <button
           onClick={() => {
             setEditingId(null);
             setDraft(emptyDraft);
           }}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#2878f0] px-4 py-2.5 text-sm font-semibold text-white"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1F78FF] px-4 py-2.5 text-sm font-semibold text-white"
         >
           <Plus className="h-4 w-4" />
           Add subscription
@@ -543,12 +543,12 @@ export default function SubscriptionsContent({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-[#2878f0]">
+              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-[#1F78FF]">
                 {visibleCandidates.length} to review
               </span>
               <button
                 onClick={() => setPotentialVisible((visible) => !visible)}
-                className="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#2878f0]"
+                className="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#1F78FF]"
               >
                 {potentialVisible ? "Hide" : "Show"}
               </button>
@@ -596,7 +596,7 @@ export default function SubscriptionsContent({
                           </button>
                           <button
                             onClick={() => openCandidate(candidate)}
-                            className="inline-flex items-center gap-1 rounded-lg bg-[#2878f0] px-3 py-1.5 text-xs font-semibold text-white"
+                            className="inline-flex items-center gap-1 rounded-lg bg-[#1F78FF] px-3 py-1.5 text-xs font-semibold text-white"
                           >
                             <Check className="h-3.5 w-3.5" />
                             Confirm
@@ -621,7 +621,7 @@ export default function SubscriptionsContent({
           </p>
           <Link
             href="/wallet"
-            className="mt-4 inline-flex rounded-xl bg-[#2878f0] px-4 py-2 text-sm font-semibold text-white"
+            className="mt-4 inline-flex rounded-xl bg-[#1F78FF] px-4 py-2 text-sm font-semibold text-white"
           >
             Go to Wallet
           </Link>
@@ -643,14 +643,14 @@ export default function SubscriptionsContent({
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search subscriptions"
-                className="w-52 rounded-xl border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-[#2878f0]"
+                className="w-52 rounded-xl border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-[#1F78FF]"
               />
             </label>
             {(["all", "soon", "monthly", "annual"] as const).map((option) => (
               <button
                 key={option}
                 onClick={() => setFilter(option)}
-                className={`rounded-xl px-3 py-2 text-xs font-semibold ${filter === option ? "bg-[#2878f0] text-white" : "border border-slate-200 text-slate-500"}`}
+                className={`rounded-xl px-3 py-2 text-xs font-semibold ${filter === option ? "bg-[#1F78FF] text-white" : "border border-slate-200 text-slate-500"}`}
               >
                 {option === "all"
                   ? "All"
@@ -768,7 +768,7 @@ function Metric({
 }) {
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-5">
-      <Icon className="h-5 w-5 text-[#2878f0]" />
+      <Icon className="h-5 w-5 text-[#1F78FF]" />
       <p className="mt-5 text-sm font-medium text-slate-600">{label}</p>
       <p className="mt-1 text-3xl font-bold tracking-tight">{value}</p>
       <p className="mt-1 text-xs text-slate-400">{note}</p>
