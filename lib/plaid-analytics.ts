@@ -75,6 +75,7 @@ async function fetchAllTransactions(
     merchant_name?: string | null;
     date: string;
     account_id: string;
+    pending: boolean;
     personal_finance_category?: { primary: string; detailed: string } | null;
   };
   const all: TxnRow[] = [];
@@ -117,6 +118,7 @@ export type PlaidAnalyticsTransaction = {
   date: string;
   category: string;
   detailedCategory: string | null;
+  pending: boolean;
 };
 
 /** Recent, presentation-safe Plaid transactions for the detailed analytics page. */
@@ -139,6 +141,7 @@ export async function getPlaidAnalyticsTransactions(
       date: transaction.date,
       category: transaction.personal_finance_category?.primary ?? "OTHER",
       detailedCategory: transaction.personal_finance_category?.detailed ?? null,
+      pending: transaction.pending,
     }))
     .sort((first, second) => second.date.localeCompare(first.date));
 }
