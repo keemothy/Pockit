@@ -16,7 +16,7 @@ import { syncCompletedMonthlySpendingSummaries } from "@/lib/monthly-spending-su
 import { InsightLink } from "./insight-link";
 
 const categoryColors = [
-  "#2878f0",
+  "#1F78FF",
   "#8848bf",
   "#ff9353",
   "#38aaa5",
@@ -93,7 +93,7 @@ function MonthSelector({
         <Link
           key={month.key}
           href={`/analytics?month=${month.key}&range=${range}`}
-          className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${month.key === selectedMonth ? "bg-[#2878f0] text-white" : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}
+          className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${month.key === selectedMonth ? "bg-[#1F78FF] text-white" : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}
         >
           {month.label}
         </Link>
@@ -115,7 +115,7 @@ function RangeSelector({
         <Link
           key={range}
           href={`/analytics?month=${selectedMonth}&range=${range}`}
-          className={`rounded-lg px-3 py-1.5 ${range === selectedRange ? "bg-[#2878f0] text-white shadow-sm" : "text-slate-500 hover:bg-white"}`}
+          className={`rounded-lg px-3 py-1.5 ${range === selectedRange ? "bg-[#1F78FF] text-white shadow-sm" : "text-slate-500 hover:bg-white"}`}
         >
           Past {range} months
         </Link>
@@ -442,18 +442,20 @@ export default async function AnalyticsPage({
   ].filter((row): row is NonNullable<typeof row> => Boolean(row));
 
   return (
-    <div className="mx-auto max-w-[1280px] pb-10 text-[#172033]">
-      <header className="flex flex-col gap-4 border-b border-slate-100 pb-6 sm:flex-row sm:items-start sm:justify-between">
+    <div className="mx-auto max-w-[1280px] pb-10">
+      <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight">Analytics</h1>
-          <p className="mt-1 text-[15px] text-slate-500">
-            Understand your spending patterns and make smarter decisions.
+          <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+            Analytics
           </p>
+          <h1 className="mt-0.5 text-[28px] font-black tracking-tight text-slate-900">
+            Spending insights
+          </h1>
         </div>
       </header>
 
       {transactions.length === 0 && manualCards.length === 0 ? (
-        <section className="mt-7 rounded-2xl border border-dashed border-[#9dc8fa] bg-[#f7fbff] px-6 py-16 text-center shadow-sm">
+        <section className="mt-7 rounded-2xl border border-dashed border-blue-200 bg-blue-50/50 px-6 py-16 text-center shadow-sm">
           <ChartNoAxesCombined className="mx-auto h-11 w-11 text-[#1f78ff]" />
           <h2 className="mt-4 text-xl font-semibold">
             Your analytics will appear here
@@ -466,14 +468,14 @@ export default async function AnalyticsPage({
       ) : (
         <>
           <section className="mt-7 grid max-w-sm gap-4">
-            <article className="rounded-2xl border border-[#d7e0ed] bg-white p-5 shadow-[0_6px_18px_rgba(38,85,141,0.04)]">
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-[#e9f3ff]">
-                <DollarSign className="h-5 w-5 text-[#247dff]" />
+            <article className="rounded-2xl bg-white p-5" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03)" }}>
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-blue-50">
+                <DollarSign className="h-5 w-5 text-[#1F78FF]" />
               </span>
-              <p className="mt-4 text-[15px] font-medium text-slate-600">
+              <p className="mt-4 text-[13px] font-medium text-slate-500">
                 Total spending
               </p>
-              <p className="mt-1 text-3xl font-bold tracking-tight">
+              <p className="mt-1 font-mono text-3xl font-black tracking-tight text-slate-900" style={{ fontVariantNumeric: "tabular-nums" }}>
                 {moneyPrecise.format(currentTotalSpent)}
               </p>
               <div className="mt-1 flex items-center justify-between text-sm">
@@ -503,7 +505,7 @@ export default async function AnalyticsPage({
           <section className="mt-6 grid gap-6 xl:grid-cols-[1.9fr_1fr]">
             <article
               id="spending-overview"
-              className="analytics-scroll-target scroll-mt-6 rounded-2xl border border-[#dbe3ee] bg-white p-6"
+              className="analytics-scroll-target scroll-mt-6 rounded-2xl border border-slate-100 bg-white p-6"
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
@@ -527,7 +529,7 @@ export default async function AnalyticsPage({
                       {month.amount ? money.format(month.amount) : "—"}
                     </span>
                     <div
-                      className="mx-auto w-full max-w-9 rounded-t-md bg-[#2878f0]"
+                      className="mx-auto w-full max-w-9 rounded-t-md bg-[#1F78FF]"
                       style={{
                         height: `${Math.max(month.amount ? (month.amount / highestMonth) * 100 : 2, 2)}%`,
                       }}
@@ -541,7 +543,7 @@ export default async function AnalyticsPage({
             </article>
             <article
               id="spending-by-category"
-              className="analytics-scroll-target scroll-mt-6 rounded-2xl border border-[#dbe3ee] bg-white p-6"
+              className="analytics-scroll-target scroll-mt-6 rounded-2xl border border-slate-100 bg-white p-6"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -597,7 +599,7 @@ export default async function AnalyticsPage({
           </section>
 
           <section className="mt-6 grid gap-6 xl:grid-cols-[1.9fr_1fr]">
-            <article className="rounded-2xl border border-[#dbe3ee] bg-white p-6">
+            <article className="rounded-2xl bg-white p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03)" }}>
               <h2 className="text-lg font-bold">Smart insights</h2>
               <p className="mt-1 text-sm text-slate-500">
                 Personalized recommendations based on this month
@@ -610,8 +612,8 @@ export default async function AnalyticsPage({
                       key={insight.title}
                       className="flex items-center gap-4"
                     >
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#e9f3ff]">
-                        <Icon className="h-4 w-4 text-[#247dff]" />
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-blue-50">
+                        <Icon className="h-4 w-4 text-[#1F78FF]" />
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold">{insight.title}</p>
@@ -629,7 +631,7 @@ export default async function AnalyticsPage({
                 })}
               </div>
             </article>
-            <article className="rounded-2xl border border-[#dbe3ee] bg-white p-6">
+            <article className="rounded-2xl bg-white p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03)" }}>
               <h2 className="text-lg font-bold">Top merchants</h2>
               <p className="mt-1 text-sm text-slate-500">
                 Highest spend this month
@@ -637,7 +639,7 @@ export default async function AnalyticsPage({
               <div className="mt-5 space-y-4">
                 {merchants.map((merchant) => (
                   <div key={merchant.name} className="flex items-center gap-3">
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#e9f3ff] text-xs font-bold text-[#2878f0]">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-blue-50 text-xs font-bold text-[#1F78FF]">
                       {merchant.name.slice(0, 1).toUpperCase()}
                     </span>
                     <div className="min-w-0 flex-1">
@@ -658,7 +660,7 @@ export default async function AnalyticsPage({
           </section>
 
           {manualCards.length > 0 && (
-            <section className="mt-6 rounded-2xl border border-[#dbe3ee] bg-white p-6">
+            <section className="mt-6 rounded-2xl border border-slate-100 bg-white p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-bold">Wallet cards</h2>
@@ -666,7 +668,7 @@ export default async function AnalyticsPage({
                     Manual cards saved in your Wallet
                   </p>
                 </div>
-                <span className="rounded-lg bg-[#e9f3ff] px-2.5 py-1 text-xs font-semibold text-[#2878f0]">
+                <span className="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-[#1F78FF]">
                   {manualCards.length} saved
                 </span>
               </div>

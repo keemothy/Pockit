@@ -4,6 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 @AGENTS.md
 
+## Commit rules
+
+**NEVER add `Co-Authored-By` lines to any commit message.** Commits must show only the human author. No exceptions.
+
 ## Commands
 
 ```bash

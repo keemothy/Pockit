@@ -35,9 +35,10 @@ body {
 .dark .text-slate-500, .dark .text-slate-400, .dark .text-gray-500, .dark .text-gray-400, .dark .text-zinc-500, .dark .text-zinc-400 { color: #94a3b8 !important; }
 .dark .text-\[\#1F78FF\], .dark .text-\[\#2865e9\], .dark .text-\[\#2878f0\] { color: #93c5fd !important; }
 .dark .border-slate-100, .dark .border-slate-200, .dark .border-slate-300, .dark .border-gray-100, .dark .border-gray-200, .dark .border-gray-300 { border-color: #334155 !important; }
-.dark input, .dark select { background-color: #0f172a; color: #f1f5f9; border-color: #475569; }
-.dark input::placeholder { color: #94a3b8; }
+.dark input, .dark select, .dark textarea { background-color: #0f172a; color: #f1f5f9; border-color: #475569; }
+.dark input::placeholder, .dark textarea::placeholder { color: #94a3b8; }
 .dark .hover\:bg-slate-50:hover, .dark .hover\:bg-gray-100:hover { background-color: #1e293b !important; }
+.dark .skeleton { background-color: #1e293b; }
 .dark .pockit-wallet .bg-\[\#ececec\] { background-color: #182233 !important; }
 .dark .pockit-wallet .bg-\[\#eaf3ff\], .dark .pockit-wallet .bg-\[\#f7fbff\], .dark .pockit-chat .bg-\[\#E9F1FF\] { background-color: #172554 !important; }
 .dark .pockit-chat .border-blue-100, .dark .pockit-chat .border-blue-200 { border-color: #29456f !important; }

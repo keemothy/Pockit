@@ -123,18 +123,8 @@ also make sure to remove any related information on supabase
   }
 
   return (
-    <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-      <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-        Privacy &amp; data
-      </h2>
-      <p className="mt-1 text-sm text-slate-600">
-        Control exports, connected financial data, and account deletion.
-      </p>
-
-      <nav
-        aria-label="Settings sections"
-        className="mt-6 flex gap-1 overflow-x-auto border-b border-slate-200"
-      >
+    <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+      <nav className="flex gap-1 overflow-x-auto border-b border-slate-200">
         {tabs.map((tab) => {
           const active = tab.href === "/settings/privacy";
           return (
