@@ -147,21 +147,6 @@ export default async function WalletPage() {
     (account) => itemEnvironments[account.plaid_item_id] === activePlaidEnvironment,
   );
   const creditCardAccounts = activeAccounts.filter((account) => account.type?.toLowerCase() === 'credit');
-  // Only credit cards belong in Wallets. Older connections can still have
-  // checking or savings rows stored, but they must not appear as card links.
-  const connectedBanks = Object.values(creditCardAccounts.reduce<Record<string, ConnectedPlaidBank>>(
-    (banks, account) => {
-      const existing = banks[account.plaid_item_id];
-      banks[account.plaid_item_id] = {
-        plaidItemId: account.plaid_item_id,
-        name: existing?.name ?? account.official_name ?? account.name,
-        accountCount: (existing?.accountCount ?? 0) + 1,
-      };
-      return banks;
-    },
-    {},
-  ));
-
   const spendingCategories = await getSpendingCategories(
     user.id,
     creditCardAccounts.map((account) => ({
@@ -239,6 +224,22 @@ export default async function WalletPage() {
       monthlyCategories,
     };
   });
+
+  // Use the resolved Wallet-card name here so a user-selected catalog match
+  // replaces Plaid's generic account label everywhere in Wallets.
+  const connectedBanks = Object.values(connectedCards.reduce<Record<string, ConnectedPlaidBank>>(
+    (banks, card) => {
+      if (!card.plaidItemId) return banks;
+      const existing = banks[card.plaidItemId];
+      banks[card.plaidItemId] = {
+        plaidItemId: card.plaidItemId,
+        name: existing?.name ?? card.name,
+        accountCount: (existing?.accountCount ?? 0) + 1,
+      };
+      return banks;
+    },
+    {},
+  ));
 
   const savedManualCards: WalletCard[] = (manualCards ?? []).map((card, index) => {
     const catalogCard = card.catalog_card_id ? catalog.find((catalogEntry) => catalogEntry.cardId === card.catalog_card_id) : undefined;

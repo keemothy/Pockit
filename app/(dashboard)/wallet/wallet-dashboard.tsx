@@ -418,14 +418,18 @@ export default function WalletDashboard({
   }
 
   useEffect(() => {
-    if ((!isModalOpen && !cardMatcherCard) || catalogCards.length > 0) return;
+    if (
+      (!isModalOpen && !cardMatcherCard && !manualEditorCard) ||
+      catalogCards.length > 0
+    )
+      return;
     fetch("/api/cards/catalog")
       .then((response) => (response.ok ? response.json() : { cards: [] }))
       .then((payload: { cards?: CatalogCard[] }) =>
         setCatalogCards(payload.cards ?? []),
       )
       .catch(() => setCatalogCards([]));
-  }, [isModalOpen, cardMatcherCard, catalogCards.length]);
+  }, [isModalOpen, cardMatcherCard, manualEditorCard, catalogCards.length]);
 
   async function addCard(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -450,6 +454,10 @@ export default function WalletDashboard({
     const catalogMatch = catalogCards.find((catalogCard) =>
       cardCatalogMatchesName(catalogCard, name),
     );
+    if (!catalogMatch) {
+      setManualCardError("Choose a credit card from the available list.");
+      return;
+    }
     const monthlyCategories = groupCategoriesByMonth(newCategories);
     if (
       newCategories.some(
@@ -474,14 +482,12 @@ export default function WalletDashboard({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: catalogMatch
-            ? displayCatalogCardName(catalogMatch)
-            : name.trim(),
+          name: displayCatalogCardName(catalogMatch),
           lastFour: normalizedLastFour,
           currentBalance: parsedBalance,
           creditLimit: parsedLimit,
           monthlyCategories,
-          catalogCardId: catalogMatch?.cardId,
+          catalogCardId: catalogMatch.cardId,
         }),
       });
       const payload = (await response.json()) as {
@@ -493,7 +499,7 @@ export default function WalletDashboard({
       const currentCategories = monthlyCategories[currentMonthKey()] ?? [];
       const card: WalletCard = {
         id: payload.card.id,
-        name: catalogMatch ? displayCatalogCardName(catalogMatch) : name.trim(),
+        name: displayCatalogCardName(catalogMatch),
         issuer: "CREDIT CARD",
         lastFour: normalizedLastFour,
         cardholderName,
@@ -501,8 +507,8 @@ export default function WalletDashboard({
         limit: parsedLimit,
         color: "blue",
         rewardDetails: catalogRewardDetails(catalogMatch),
-        rewardsMatched: Boolean(catalogMatch),
-        catalogCardId: catalogMatch?.cardId,
+        rewardsMatched: true,
+        catalogCardId: catalogMatch.cardId,
         hasSpendingData: currentCategories.length > 0,
         categories: currentCategories,
         monthlyCategories,
@@ -704,6 +710,13 @@ export default function WalletDashboard({
       setManualCardError("Credit usage cannot exceed credit limit");
       return;
     }
+    const catalogMatch = catalogCards.find((catalogCard) =>
+      cardCatalogMatchesName(catalogCard, manualName),
+    );
+    if (!catalogMatch) {
+      setManualCardError("Choose a credit card from the available list.");
+      return;
+    }
     const monthlyCategories = groupCategoriesByMonth(manualCategories);
     if (
       manualCategories.some(
@@ -729,12 +742,12 @@ export default function WalletDashboard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: manualEditorCard.id,
-          name: manualName.trim(),
+          name: displayCatalogCardName(catalogMatch),
           lastFour: manualEditorCard.lastFour,
           currentBalance: parsedBalance,
           creditLimit: parsedLimit,
           monthlyCategories,
-          catalogCardId: manualEditorCard.catalogCardId,
+          catalogCardId: catalogMatch.cardId,
         }),
       });
       const payload = (await response.json()) as { error?: string };
@@ -745,7 +758,10 @@ export default function WalletDashboard({
           card.id === manualEditorCard.id
             ? {
                 ...card,
-                name: manualName.trim(),
+                name: displayCatalogCardName(catalogMatch),
+                catalogCardId: catalogMatch.cardId,
+                rewardDetails: catalogRewardDetails(catalogMatch),
+                rewardsMatched: true,
                 currentBalance: parsedBalance,
                 limit: parsedLimit,
                 categories: monthlyCategories[currentMonthKey()] ?? [],
@@ -1641,6 +1657,8 @@ export default function WalletDashboard({
               <label className="block text-sm font-medium">
                 Card name
                 <input
+                  required
+                  list="credit-card-catalog"
                   value={manualName}
                   onChange={(event) => setManualName(event.target.value)}
                   className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500"

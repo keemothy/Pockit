@@ -40,6 +40,11 @@ body {
 .dark .hover\:bg-slate-50:hover, .dark .hover\:bg-gray-100:hover { background-color: #1e293b !important; }
 .dark .pockit-wallet .bg-\[\#ececec\] { background-color: #182233 !important; }
 .dark .pockit-wallet .bg-\[\#eaf3ff\], .dark .pockit-wallet .bg-\[\#f7fbff\], .dark .pockit-chat .bg-\[\#E9F1FF\] { background-color: #172554 !important; }
+.dark .pockit-analytics { color: #e2e8f0; }
+.dark .pockit-analytics .bg-white { background-color: #111827 !important; }
+.dark .pockit-analytics .bg-slate-50 { background-color: #0f172a !important; }
+.dark .pockit-analytics .bg-\[\#f7fbff\], .dark .pockit-analytics .bg-\[\#e9f3ff\] { background-color: #172554 !important; }
+.dark .pockit-analytics .border-\[\#9dc8fa\], .dark .pockit-analytics .border-\[\#d7e0ed\], .dark .pockit-analytics .border-\[\#dbe3ee\] { border-color: #334155 !important; }
 .dark .pockit-chat .border-blue-100, .dark .pockit-chat .border-blue-200 { border-color: #29456f !important; }
 .dark .potential-subscriptions.bg-blue-50 { background-color: #14233a !important; border-color: #2b4a71 !important; }
 .dark .potential-subscriptions .bg-white { background-color: #18283e !important; }
@@ -148,6 +153,8 @@ body {
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.75), transparent);
   animation: shimmer 1.6s ease-in-out infinite;
 }
+.dark .skeleton { background-color: #1e293b; }
+.dark .skeleton::after { background: linear-gradient(90deg, transparent, rgba(71,85,105,0.72), transparent); }
 
 /* ── Floating pill animation (AI card prompts) ─────────── */
 @keyframes pill-float {

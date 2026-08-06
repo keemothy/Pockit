@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePlaidLink } from "react-plaid-link";
+import { ArrowLeft } from "lucide-react";
 
 type BankAccount = {
   id: string;
@@ -79,6 +80,14 @@ export default function ConnectBank() {
 
   return (
     <section className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <button
+        type="button"
+        onClick={() => router.push("/wallet")}
+        className="mb-6 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+      >
+        <ArrowLeft size={16} aria-hidden="true" />
+        Back to Wallets
+      </button>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-blue-600">Secure connection</p>
