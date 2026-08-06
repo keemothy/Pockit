@@ -23,6 +23,36 @@ function validMonthlyCategories(value: unknown): value is MonthlyCategoriesInput
     ));
 }
 
+function creditUsageExceedsLimit(body: unknown) {
+  if (!body || typeof body !== "object") return false;
+  const { currentBalance, creditLimit } = body as Record<string, unknown>;
+  return typeof currentBalance === "number"
+    && Number.isFinite(currentBalance)
+    && typeof creditLimit === "number"
+    && Number.isFinite(creditLimit)
+    && currentBalance > creditLimit;
+}
+
+function monthlySpendingExceedsLimit(card: {
+  credit_limit: number;
+  monthly_categories: MonthlyCategoriesInput;
+}) {
+  return Object.values(card.monthly_categories).some((categories) =>
+    categories.reduce((total, category) => total + category.amount, 0) >
+    card.credit_limit,
+  );
+}
+
+function monthlySpendingExceedsUsage(card: {
+  current_balance: number;
+  monthly_categories: MonthlyCategoriesInput;
+}) {
+  return Object.values(card.monthly_categories).some((categories) =>
+    categories.reduce((total, category) => total + category.amount, 0) >
+    card.current_balance,
+  );
+}
+
 function parseCard(body: unknown) {
   if (!body || typeof body !== "object") return null;
   const value = body as Record<string, unknown>;
@@ -62,8 +92,18 @@ async function signedInUser() {
 export async function POST(request: Request) {
   const { supabase, user } = await signedInUser();
   if (!user) return NextResponse.json({ error: "Sign in to save a card." }, { status: 401 });
-  const card = parseCard(await request.json().catch(() => null));
+  const body = await request.json().catch(() => null);
+  if (creditUsageExceedsLimit(body)) {
+    return NextResponse.json({ error: "Credit usage cannot exceed credit limit" }, { status: 400 });
+  }
+  const card = parseCard(body);
   if (!card) return NextResponse.json({ error: "Enter valid card details." }, { status: 400 });
+  if (monthlySpendingExceedsLimit(card)) {
+    return NextResponse.json({ error: "Credit usage cannot exceed credit limit" }, { status: 400 });
+  }
+  if (monthlySpendingExceedsUsage(card)) {
+    return NextResponse.json({ error: "Monthly spending cannot exceed credit usage" }, { status: 400 });
+  }
 
   const { monthly_categories, ...cardValues } = card;
   const { data, error } = await supabase.from("manual_cards").insert({ ...cardValues, user_id: user.id, spending_categories: monthly_categories }).select().single();
@@ -75,8 +115,17 @@ export async function PATCH(request: Request) {
   const { supabase, user } = await signedInUser();
   if (!user) return NextResponse.json({ error: "Sign in to update a card." }, { status: 401 });
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
+  if (creditUsageExceedsLimit(body)) {
+    return NextResponse.json({ error: "Credit usage cannot exceed credit limit" }, { status: 400 });
+  }
   const card = parseCard(body);
   if (!body || typeof body.id !== "string" || !card) return NextResponse.json({ error: "Enter valid card details." }, { status: 400 });
+  if (monthlySpendingExceedsLimit(card)) {
+    return NextResponse.json({ error: "Credit usage cannot exceed credit limit" }, { status: 400 });
+  }
+  if (monthlySpendingExceedsUsage(card)) {
+    return NextResponse.json({ error: "Monthly spending cannot exceed credit usage" }, { status: 400 });
+  }
 
   const { data: existing } = await supabase.from("manual_cards").select("id").eq("id", body.id).eq("user_id", user.id).single();
   if (!existing) return NextResponse.json({ error: "Card not found." }, { status: 404 });

@@ -213,6 +213,26 @@ function groupCategoriesByMonth(categories: EditableSpendingCategory[]) {
     {},
   );
 }
+
+function monthlySpendingExceedsCreditLimit(
+  monthlyCategories: Record<string, { amount: number }[]>,
+  creditLimit: number,
+) {
+  return Object.values(monthlyCategories).some((categories) =>
+    categories.reduce((total, category) => total + category.amount, 0) >
+    creditLimit,
+  );
+}
+
+function monthlySpendingExceedsCreditUsage(
+  monthlyCategories: Record<string, { amount: number }[]>,
+  creditUsage: number,
+) {
+  return Object.values(monthlyCategories).some((categories) =>
+    categories.reduce((total, category) => total + category.amount, 0) >
+    creditUsage,
+  );
+}
 function monthlySpendingTotal(card: WalletCard) {
   return card.categories.reduce((sum, category) => sum + category.amount, 0);
 }
@@ -389,6 +409,7 @@ export default function WalletDashboard({
   const [disconnectError, setDisconnectError] = useState("");
 
   function focusCard(cardId: string) {
+    setCurrentCardId(cardId);
     setFocusedCardId(cardId);
     document.getElementById(`wallet-card-${cardId}`)?.scrollIntoView({
       behavior: "smooth",
@@ -421,6 +442,10 @@ export default function WalletDashboard({
       setManualCardError("Enter valid card details before saving.");
       return;
     }
+    if (parsedBalance > parsedLimit) {
+      setManualCardError("Credit usage cannot exceed credit limit");
+      return;
+    }
 
     const catalogMatch = catalogCards.find((catalogCard) =>
       cardCatalogMatchesName(catalogCard, name),
@@ -432,6 +457,14 @@ export default function WalletDashboard({
       )
     ) {
       setManualCardError("Choose a valid spending month for every entry.");
+      return;
+    }
+    if (monthlySpendingExceedsCreditLimit(monthlyCategories, parsedLimit)) {
+      setManualCardError("Credit usage cannot exceed credit limit");
+      return;
+    }
+    if (monthlySpendingExceedsCreditUsage(monthlyCategories, parsedBalance)) {
+      setManualCardError("Monthly spending cannot exceed credit usage");
       return;
     }
     setIsSavingManualCard(true);
@@ -667,6 +700,10 @@ export default function WalletDashboard({
       setManualCardError("Enter valid card details before saving.");
       return;
     }
+    if (parsedBalance > parsedLimit) {
+      setManualCardError("Credit usage cannot exceed credit limit");
+      return;
+    }
     const monthlyCategories = groupCategoriesByMonth(manualCategories);
     if (
       manualCategories.some(
@@ -674,6 +711,14 @@ export default function WalletDashboard({
       )
     ) {
       setManualCardError("Choose a valid spending month for every entry.");
+      return;
+    }
+    if (monthlySpendingExceedsCreditLimit(monthlyCategories, parsedLimit)) {
+      setManualCardError("Credit usage cannot exceed credit limit");
+      return;
+    }
+    if (monthlySpendingExceedsCreditUsage(monthlyCategories, parsedBalance)) {
+      setManualCardError("Monthly spending cannot exceed credit usage");
       return;
     }
     setIsSavingManualCard(true);
@@ -839,14 +884,14 @@ export default function WalletDashboard({
               className="inline-flex items-center gap-2 rounded-xl bg-[#121926] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
             >
               <Landmark size={16} aria-hidden="true" />
-              Connect bank
+              Connect your bank
             </a>
             <button
               type="button"
               onClick={() => setIsManageCardsOpen(true)}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+              className="rounded-xl border border-slate-300 cursor-pointer bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
             >
-              Manage cards
+              Manage your cards
             </button>
             <button
               type="button"
@@ -854,9 +899,9 @@ export default function WalletDashboard({
                 setManualCardError("");
                 setIsModalOpen(true);
               }}
-              className="rounded-xl bg-[#2865e9] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
+              className="rounded-xl bg-[#2865e9] px-4 py-2 text-sm font-medium cursor-pointer text-white shadow-sm transition hover:bg-blue-700"
             >
-              ＋ &nbsp; Add credit card
+              ＋ &nbsp; Manually add credit card
             </button>
           </div>
         </div>
@@ -873,12 +918,12 @@ export default function WalletDashboard({
                 ? "Your checking or savings account is connected. Wallets currently displays credit cards only."
                 : "Connect a bank or add a card to start tracking balances and spending."}
             </p>
-            <a
+            {/* <a
               href="/auth/connect-bank"
               className="mt-5 inline-block rounded-xl bg-[#2865e9] px-4 py-2 text-sm font-medium text-white"
             >
               Connect bank
-            </a>
+            </a> */}
           </section>
         ) : (
           <section className="mt-6">
@@ -892,7 +937,7 @@ export default function WalletDashboard({
                   setAreCardPreviewsVisible((isVisible) => !isVisible)
                 }
                 aria-expanded={areCardPreviewsVisible}
-                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
+                className="inline-flex cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
               >
                 {areCardPreviewsVisible ? (
                   <>
@@ -914,7 +959,7 @@ export default function WalletDashboard({
                     key={card.id}
                     type="button"
                     onClick={() => focusCard(card.id)}
-                    className={`h-[116px] w-[330px] shrink-0 overflow-hidden rounded-xl border p-3 text-left shadow-sm transition ${currentCardId === card.id ? "border-[#4e91ff] bg-[#eaf3ff] ring-2 ring-[#93c5fd]" : focusedCardId === card.id ? "border-[#b9d8ff] bg-[#f7fbff]" : "border-transparent bg-white hover:-translate-y-0.5"}`}
+                    className={`h-[116px] w-[330px] shrink-0 cursor-pointer overflow-hidden rounded-xl border p-3 text-left shadow-sm transition ${currentCardId === card.id ? "border-[#4e91ff] bg-[#eaf3ff] ring-2 ring-[#93c5fd]" : focusedCardId === card.id ? "border-[#b9d8ff] bg-[#f7fbff]" : "border-transparent bg-white hover:-translate-y-0.5"}`}
                   >
                     <div className="flex gap-3">
                       <CreditCardVisual card={card} compact />
@@ -994,27 +1039,6 @@ export default function WalletDashboard({
                       </button>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCurrentCardId(card.id);
-                      setFocusedCardId(card.id);
-                    }}
-                    aria-pressed={isCurrentCard}
-                    className="shrink-0 text-center"
-                  >
-                    <span
-                      className={`flex h-5 w-16 overflow-hidden rounded-full ${isCurrentCard ? "bg-[#a9c9ff]" : "bg-[#eeeeee]"}`}
-                      aria-hidden="true"
-                    >
-                      <span
-                        className={`h-full w-8 rounded-full ${isCurrentCard ? "ml-auto bg-[#2865e9]" : "bg-[#cfcfcf]"}`}
-                      />
-                    </span>
-                    <span className="mt-1 block text-[11px] font-medium text-slate-600">
-                      Current card
-                    </span>
-                  </button>
                 </div>
                 <div className="mt-3 grid gap-4 xl:grid-cols-[260px_minmax(360px,0.8fr)_minmax(300px,0.55fr)] xl:items-start">
                   <div>
@@ -1230,7 +1254,7 @@ export default function WalletDashboard({
               {connectedBanks.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    Connected banks
+                    Connected credit cards
                   </p>
                   {connectedBanks.map((bank) => (
                     <div
@@ -1392,7 +1416,7 @@ export default function WalletDashboard({
                   id="add-card-details-title"
                   className="mt-1 text-2xl font-bold"
                 >
-                  Add credit card
+                  Manually add credit card
                 </h2>
               </div>
               <button
