@@ -442,7 +442,7 @@ export default async function AnalyticsPage({
   ].filter((row): row is NonNullable<typeof row> => Boolean(row));
 
   return (
-    <div className="mx-auto max-w-[1280px] pb-10 text-[#172033]">
+    <div className="pockit-analytics mx-auto max-w-[1280px] pb-10 text-[#172033]">
       <header className="flex flex-col gap-4 border-b border-slate-100 pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-4xl font-bold tracking-tight">Analytics</h1>

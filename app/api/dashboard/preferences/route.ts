@@ -16,6 +16,15 @@ export async function PUT(request: Request) {
   const hidden = widgetList(body?.hiddenWidgets);
   if (!order || !hidden || new Set(order).size !== WIDGETS.length || order.length !== WIDGETS.length || hidden.includes("total-balance")) return NextResponse.json({ error: "Invalid dashboard layout." }, { status: 400 });
   const { error } = await supabase.from("dashboard_preferences").upsert({ user_id: user.id, widget_order: order, hidden_widgets: hidden, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
-  if (error) return NextResponse.json({ error: "Unable to save dashboard preferences." }, { status: 500 });
+  if (error) {
+    const metadata = user.user_metadata as Record<string, unknown>;
+    const { error: metadataError } = await supabase.auth.updateUser({
+      data: {
+        ...metadata,
+        dashboard_preferences: { widget_order: order, hidden_widgets: hidden },
+      },
+    });
+    if (metadataError) return NextResponse.json({ error: "Unable to save dashboard preferences." }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }
