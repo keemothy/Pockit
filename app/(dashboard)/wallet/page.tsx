@@ -147,7 +147,9 @@ export default async function WalletPage() {
     (account) => itemEnvironments[account.plaid_item_id] === activePlaidEnvironment,
   );
   const creditCardAccounts = activeAccounts.filter((account) => account.type?.toLowerCase() === 'credit');
-  const connectedBanks = Object.values(activeAccounts.reduce<Record<string, ConnectedPlaidBank>>(
+  // Only credit cards belong in Wallets. Older connections can still have
+  // checking or savings rows stored, but they must not appear as card links.
+  const connectedBanks = Object.values(creditCardAccounts.reduce<Record<string, ConnectedPlaidBank>>(
     (banks, account) => {
       const existing = banks[account.plaid_item_id];
       banks[account.plaid_item_id] = {
